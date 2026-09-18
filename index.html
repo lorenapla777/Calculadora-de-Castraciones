@@ -1,0 +1,2606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Teatro — ensayá tus escenas</title>
+<meta name="description" content="Pegá un guion, asigná una voz a cada personaje y ensayá tus escenas. Modo ensayo: silenciá tu personaje y decí tus líneas en voz alta.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0F1116">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --stage:#0F1116;
+  --panel:#171A22;
+  --panel-2:#1C202A;
+  --rule:#282D3A;
+  --ink:#E9E6DE;
+  --ink-dim:#8B90A0;
+  --ink-faint:#5B6070;
+  --paper:#F4F1E8;
+  --paper-ink:#14161B;
+  --warm:#E8B44A;
+  --alert:#E86A5A;
+  --ok:#5BC98C;
+  --radius:10px;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,'Courier New',monospace;
+  --serif:'Newsreader','Iowan Old Style',Georgia,'Times New Roman',serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--stage);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:120px;
+}
+@media(min-width:900px){body{padding-bottom:32px}}
+button,select,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+
+/* ---------- header ---------- */
+header{
+  border-bottom:1px solid var(--rule);
+  padding:14px 18px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:var(--stage);
+}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand h1{
+  font-size:17px;letter-spacing:.22em;text-transform:uppercase;
+  font-weight:700;margin:0;
+}
+.brand .tag{color:var(--ink-faint);font-size:11px;letter-spacing:.08em}
+@media(max-width:600px){.brand .tag{display:none}}
+.hbtn{
+  background:transparent;border:1px solid var(--rule);color:var(--ink-dim);
+  padding:6px 11px;border-radius:999px;font-size:12px;letter-spacing:.06em;
+}
+.hbtn:hover{border-color:var(--ink-faint);color:var(--ink)}
+.hbtn.on{border-color:var(--warm);color:var(--warm)}
+.hbtn.studio{border-color:var(--warm);color:var(--warm);letter-spacing:.14em;font-weight:700}
+.lang{display:flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden}
+.lang button{background:transparent;border:0;padding:6px 12px;font-size:12px;color:var(--ink-faint);letter-spacing:.08em}
+.lang button.on{background:var(--warm);color:#14161B;font-weight:700}
+
+/* ---------- layout ---------- */
+main{max-width:1240px;margin:0 auto;padding:20px 18px;display:grid;gap:20px}
+@media(min-width:900px){
+  main{grid-template-columns:360px 1fr;align-items:start}
+  .col-setup{position:sticky;top:18px;max-height:calc(100vh - 40px);overflow-y:auto;padding-right:4px}
+}
+.col-setup{display:grid;gap:16px;align-content:start}
+.col-stage{display:grid;gap:14px;align-content:start;min-width:0}
+
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);padding:16px}
+.panel h2{
+  margin:0 0 12px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-dim);font-weight:500;display:flex;align-items:center;gap:8px;
+}
+.panel h2::before{content:attr(data-n);color:var(--warm);font-weight:700}
+.hint{color:var(--ink-faint);font-size:12px;line-height:1.55;margin:10px 0 0;white-space:pre-line}
+
+textarea{
+  width:100%;min-height:150px;background:var(--panel-2);border:1px solid var(--rule);
+  border-radius:8px;padding:11px;resize:vertical;line-height:1.6;font-size:13px;
+}
+textarea::placeholder{color:var(--ink-faint)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{
+  background:var(--panel-2);border:1px solid var(--rule);border-radius:8px;
+  padding:9px 14px;font-size:13px;letter-spacing:.03em;
+}
+.btn:hover{border-color:var(--ink-faint)}
+.btn.primary{background:var(--warm);color:#14161B;border-color:var(--warm);font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink-dim)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.wide{flex:1;justify-content:center}
+
+label.field{display:block;margin-bottom:10px}
+label.field > span{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px}
+select,input[type=text],input[type=password],input[type=number]{
+  width:100%;background:var(--panel-2);border:1px solid var(--rule);border-radius:8px;padding:8px 9px;font-size:13px;
+}
+input[type=range]{width:100%;accent-color:var(--warm)}
+
+/* ---------- cast ---------- */
+.cast{display:grid;gap:10px}
+.char{border:1px solid var(--rule);border-radius:8px;background:var(--panel-2);overflow:hidden}
+.char-head{display:flex;align-items:center;gap:9px;padding:9px 10px}
+.tape{
+  width:13px;height:13px;border-radius:3px;flex:none;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35) inset;
+}
+.char-name{
+  flex:1;min-width:0;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;
+}
+.char-count{color:var(--ink-faint);font-size:11px;flex:none}
+.mini{
+  background:transparent;border:1px solid var(--rule);color:var(--ink-faint);
+  border-radius:6px;padding:3px 7px;font-size:10.5px;letter-spacing:.06em;flex:none;
+}
+.mini:hover{color:var(--ink);border-color:var(--ink-faint)}
+.mini.on{border-color:var(--warm);color:var(--warm)}
+.mini.mine.on{border-color:var(--ok);color:var(--ok)}
+.char-body{padding:0 10px 10px;display:grid;gap:7px}
+.char-body.hidden{display:none}
+.inline2{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:end}
+
+/* ---------- transport ---------- */
+.transport{
+  background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);
+  padding:11px 13px;display:grid;gap:10px;
+}
+@media(min-width:900px){.transport{position:sticky;top:18px;z-index:20}}
+@media(max-width:899px){
+  .transport{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;border-radius:14px 14px 0 0;
+    border-bottom:0;padding-bottom:calc(11px + env(safe-area-inset-bottom));
+    box-shadow:0 -14px 30px rgba(0,0,0,.5);
+  }
+}
+.tbtns{display:flex;align-items:center;justify-content:center;gap:7px}
+.tbtn{
+  background:var(--panel-2);border:1px solid var(--rule);color:var(--ink);
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:none;
+}
+.tbtn:hover:not(:disabled){border-color:var(--ink-faint)}
+.tbtn:disabled{opacity:.3;cursor:not-allowed}
+.tbtn.play{width:56px;height:56px;background:var(--warm);border-color:var(--warm);color:#14161B}
+.tbtn.on{border-color:var(--warm);color:var(--warm)}
+.tbtn svg{width:17px;height:17px;fill:currentColor}
+.tbtn.play svg{width:22px;height:22px}
+.tmeta{display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:11px;color:var(--ink-faint);letter-spacing:.06em}
+.seek{flex:1;height:24px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.progress{height:4px;background:var(--rule);border-radius:2px;width:100%;position:relative}
+.progress i{display:block;height:100%;background:var(--warm);width:0;border-radius:2px;position:relative;transition:width .25s}
+.seek:active .progress i,.seek:hover .progress i{transition:none}
+.progress i::after{
+  content:'';position:absolute;right:-6px;top:50%;transform:translateY(-50%);
+  width:12px;height:12px;border-radius:50%;background:var(--warm);
+  box-shadow:0 0 0 3px var(--panel);
+}
+.chip{
+  background:transparent;border:1px solid var(--rule);color:var(--ink-dim);
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;padding:0;
+}
+.chip:hover{color:var(--ink);border-color:var(--ink-faint)}
+.chip svg{width:11px;height:11px;fill:currentColor}
+.tfilter{display:flex;gap:8px;align-items:center}
+.tfilter select{padding:5px 7px;font-size:11.5px}
+
+/* ---------- script ---------- */
+.script{display:grid;gap:9px}
+.empty{
+  border:1px dashed var(--rule);border-radius:var(--radius);padding:44px 22px;text-align:center;
+  color:var(--ink-faint);font-size:13px;line-height:1.7;
+}
+.ln{
+  border:1px solid transparent;border-left:3px solid var(--rule);
+  background:var(--panel);border-radius:0 8px 8px 0;padding:11px 14px;
+  cursor:pointer;transition:background .18s,color .18s,border-color .18s;
+}
+.ln:hover{background:var(--panel-2)}
+.ln .cue{
+  font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+  display:inline-block;padding:1px 6px;border-radius:3px;margin-bottom:5px;color:#14161B;
+}
+.ln .txt{font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink);margin:0}
+.ln.stage .txt{font-family:var(--mono);font-size:13px;font-style:italic;color:var(--ink-dim)}
+.ln.stage .cue{background:transparent!important;color:var(--ink-faint);border:1px solid var(--rule)}
+.ln.muted .txt{color:var(--ink-faint);text-decoration:line-through;text-decoration-thickness:1px}
+.ln.skipped{opacity:.35}
+/* the work light: only the line being spoken is lit */
+.ln.active{
+  background:var(--paper);border-color:var(--paper);
+  box-shadow:0 10px 34px rgba(0,0,0,.5);
+}
+.ln.active .txt{color:var(--paper-ink)}
+.ln.active.muted .txt{color:#6B6558}
+.ln.active.stage .txt{color:#5A5548}
+.ln.mine .txt{
+  background:linear-gradient(transparent 62%, var(--mine,#FFE24D) 62%);
+  display:inline;padding:0 1px;
+}
+.waitbar{margin-top:9px;height:4px;background:rgba(0,0,0,.15);border-radius:2px;overflow:hidden}
+.waitbar i{display:block;height:100%;background:var(--ok);width:0}
+.waitrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.waitrow span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6B6558}
+.waitrow button{background:var(--paper-ink);color:var(--paper);border:0;border-radius:6px;padding:5px 12px;font-size:11px;letter-spacing:.08em}
+
+/* ---------- modal ---------- */
+.banner{
+  border:1px solid var(--warm);background:rgba(232,180,74,.07);border-radius:var(--radius);
+  padding:13px 15px;display:grid;gap:7px;
+}
+.banner b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm)}
+.banner span{font-size:12.5px;color:var(--ink-dim);line-height:1.55}
+.banner .btn{justify-self:start;margin-top:2px}
+.steps h4{
+  margin:16px 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--warm);font-weight:600;
+}
+.steps ol{margin:0;padding-left:19px;color:var(--ink-dim);font-size:12.5px;line-height:1.75}
+.steps li{margin-bottom:5px}
+.steps kbd{
+  background:var(--panel-2);border:1px solid var(--rule);border-radius:4px;
+  padding:1px 5px;font-size:11.5px;color:var(--ink);font-family:var(--mono);
+}
+.library{display:grid;gap:8px}
+.lib-item{
+  display:flex;align-items:center;gap:9px;padding:9px 11px;
+  border:1px solid var(--rule);border-radius:8px;background:var(--panel-2);cursor:pointer;
+}
+.lib-item:hover{border-color:var(--ink-faint)}
+.lib-item .li-body{flex:1;min-width:0}
+.lib-item .li-name{
+  font-size:12.5px;letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.lib-item .li-meta{font-size:10.5px;color:var(--ink-faint);letter-spacing:.05em;margin-top:2px}
+.lib-item .li-audio{color:var(--warm)}
+.lib-item .li-del{
+  background:transparent;border:0;color:var(--ink-faint);font-size:14px;
+  padding:4px 6px;border-radius:5px;flex:none;
+}
+.lib-item .li-del:hover{color:var(--alert);background:rgba(232,106,90,.12)}
+.lib-empty{color:var(--ink-faint);font-size:12px;line-height:1.6;padding:6px 2px}
+.voice-src{display:flex;gap:6px;margin-bottom:2px}
+.srcbtn{
+  flex:1;background:var(--panel);border:1px solid var(--rule);color:var(--ink-dim);
+  border-radius:7px;padding:7px 8px;font-size:11px;letter-spacing:.04em;
+}
+.srcbtn.on{border-color:var(--warm);color:var(--warm);background:rgba(232,180,74,.08)}
+.rec-note{font-size:11.5px;color:var(--ink-faint);line-height:1.5;padding:2px 2px 0}
+.rec-line{
+  position:absolute;top:7px;right:34px;background:transparent;border:1px solid var(--rule);
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;padding:0;
+}
+.rec-line:hover{border-color:var(--alert)}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:var(--alert)}
+.rec-clear{
+  position:absolute;top:7px;right:62px;background:transparent;border:1px solid var(--rule);
+  width:26px;height:26px;border-radius:50%;display:none;place-items:center;padding:0;
+  color:var(--ink-faint);font-size:13px;
+}
+.ln.has-rec .rec-clear{display:grid}
+.rec-clear:hover{color:var(--alert);border-color:var(--alert)}
+.ln.has-rec .rec-line{border-color:var(--ok)}
+.ln.has-rec .rec-dot{background:var(--ok)}
+.ln.recording .rec-line{border-color:var(--alert);animation:pulse 1s infinite}
+.ln.recording .rec-dot{background:var(--alert);border-radius:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ln.active .rec-line{border-color:rgba(0,0,0,.2)}
+/* cue highlighting — the words that give the actor their entrance */
+mark.cuew{
+  background:var(--warm);color:#14161B;border-radius:3px;padding:0 3px;
+  font-weight:600;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+}
+.ln.active mark.cuew{background:#14161B;color:var(--paper)}
+.cue-tag{
+  display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--warm);border:1px solid var(--warm);border-radius:4px;padding:1px 6px;
+  margin-bottom:5px;font-weight:700;
+}
+.ln.cue-line{border-left-color:var(--warm)}
+.recmode{
+  flex:none;background:transparent;border:1px solid var(--rule);color:var(--ink-dim);
+  border-radius:999px;padding:5px 11px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+}
+.recmode .rec-dot{width:8px;height:8px;background:var(--alert)}
+.recmode:hover{border-color:var(--ink-faint);color:var(--ink)}
+.recmode.on{border-color:var(--alert);color:var(--alert);background:rgba(232,106,90,.08)}
+.recmode.cueonly .rec-dot{display:none}
+.recmode.cueonly.on{border-color:var(--warm);color:var(--warm);background:rgba(232,180,74,.08)}
+.modal{
+  position:fixed;inset:0;z-index:60;background:rgba(8,9,12,.82);
+  display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;
+}
+.modal.open{display:flex}
+.sheet{
+  background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+  max-width:560px;width:100%;padding:22px;margin:auto;
+}
+.sheet h3{margin:0 0 4px;font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+.sheet p{color:var(--ink-dim);font-size:12.5px;line-height:1.65}
+.sheet ol{color:var(--ink-dim);font-size:12.5px;line-height:1.75;padding-left:18px;margin:8px 0}
+.sheet a{color:var(--warm)}
+.seg{display:flex;gap:8px;margin:10px 0 4px}
+.seg button{
+  flex:1;background:var(--panel-2);border:1px solid var(--rule);border-radius:8px;
+  padding:11px 10px;font-size:12px;text-align:left;line-height:1.45;color:var(--ink-dim);
+}
+.seg button strong{display:block;color:var(--ink);font-size:12.5px;letter-spacing:.06em;margin-bottom:3px}
+.seg button.on{border-color:var(--warm);background:rgba(232,180,74,.08)}
+.seg button.on strong{color:var(--warm)}
+.seg.small button{padding:8px 9px;font-size:11px;line-height:1.35}
+.seg.small button strong{font-size:11.5px;margin-bottom:2px}
+.mini-label{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+.ln{position:relative}
+.del{
+  position:absolute;top:7px;right:8px;background:transparent;border:0;color:var(--ink-faint);
+  font-size:14px;line-height:1;padding:3px 5px;border-radius:5px;opacity:.4;
+}
+.del:hover{opacity:1;color:var(--alert);background:rgba(232,106,90,.12)}
+.ln.active .del{color:#8A8478}
+.note{
+  border-left:2px solid var(--warm);padding:9px 12px;background:var(--panel-2);
+  border-radius:0 8px 8px 0;font-size:12px;color:var(--ink-dim);line-height:1.6;margin:12px 0;
+}
+.divider{height:1px;background:var(--rule);margin:18px 0}
+.status{font-size:11.5px;color:var(--ink-faint);min-height:16px;letter-spacing:.04em}
+.status.err{color:var(--alert)}
+.status.ok{color:var(--ok)}
+footer{max-width:1240px;margin:0 auto;padding:8px 18px 30px;color:var(--ink-faint);font-size:11px;letter-spacing:.05em;line-height:1.8}
+footer #credit{display:block;margin-top:5px}
+footer #credit{font-size:11.5px;color:var(--ink-dim)}
+footer .cta{display:block;margin-top:4px}
+footer .cta a{color:var(--warm);border-bottom-color:rgba(232,180,74,.35)}
+footer .cta a:hover{border-bottom-color:var(--warm)}
+footer a{color:var(--ink-dim);text-decoration:none;border-bottom:1px solid var(--rule)}
+footer a:hover{color:var(--warm);border-color:var(--warm)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Mi Teatro</h1>
+    <span class="tag" data-i18n="tagline"></span>
+  </div>
+  <div class="lang" role="group" aria-label="Idioma / Language">
+    <button id="langEs" class="on">ES</button>
+    <button id="langEn">EN</button>
+  </div>
+  <button class="hbtn studio" id="studioBadge" style="display:none">ESTUDIO ✕</button>
+  <button class="hbtn" id="openVoices" data-i18n="moreVoices"></button>
+  <button class="hbtn" id="openSettings" data-i18n="settings"></button>
+</header>
+
+<main>
+  <div class="col-setup">
+
+    <div class="banner" id="voiceBanner" style="display:none">
+      <b data-i18n="bannerT"></b>
+      <span data-i18n="bannerD"></span>
+      <button class="btn" id="bannerBtn" data-i18n="bannerBtn"></button>
+    </div>
+
+    <section class="panel">
+      <h2 data-n="1" data-i18n="p1"></h2>
+      <div class="seg small" id="modeSeg">
+        <button id="modeScript" class="on"><strong data-i18n="modeScriptT"></strong><span data-i18n="modeScriptD"></span></button>
+        <button id="modeRead"><strong data-i18n="modeReadT"></strong><span data-i18n="modeReadD"></span></button>
+      </div>
+      <textarea id="scriptInput" spellcheck="false"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary wide" id="analyzeBtn"></button>
+        <button class="btn" id="pdfBtn" data-i18n="pdf"></button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost" id="sampleBtn" data-i18n="sample"></button>
+        <button class="btn ghost" id="clearBtn" data-i18n="clear"></button>
+      </div>
+      <div class="row" id="pdfRange" style="margin-top:8px;align-items:center;gap:6px">
+        <span class="mini-label" data-i18n="pdfFrom"></span>
+        <input type="number" id="pdfStart" min="1" placeholder="1" style="width:66px">
+        <span class="mini-label" data-i18n="pdfTo"></span>
+        <input type="number" id="pdfEnd" min="1" placeholder="—" style="width:66px">
+      </div>
+      <input type="file" id="pdfFile" accept="application/pdf" class="sr">
+      <p class="status" id="parseStatus"></p>
+      <p class="hint" data-i18n="p1hint"></p>
+    </section>
+
+    <section class="panel" id="castPanel" style="display:none">
+      <h2 data-n="2" data-i18n="p2"></h2>
+      <label class="field" id="vlangWrap">
+        <span data-i18n="voiceLang"></span>
+        <select id="voiceLang">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="all" data-i18n="allLangs"></option>
+        </select>
+      </label>
+      <div class="cast" id="cast"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost" id="autoCastBtn" data-i18n="autocast"></button>
+        <button class="btn ghost" id="pregenBtn" style="display:none" data-i18n="pregen"></button>
+        <button class="btn ghost" id="recordBtn" style="display:none" data-i18n="record"></button>
+      </div>
+      <p class="status" id="castStatus"></p>
+    </section>
+
+    <section class="panel" id="rehearsePanel" style="display:none">
+      <h2 data-n="3" data-i18n="p3"></h2>
+      <label class="field">
+        <span data-i18n="whenMine"></span>
+        <select id="waitMode">
+          <option value="timed" data-i18n="waitTimed"></option>
+          <option value="manual" data-i18n="waitManual"></option>
+          <option value="none" data-i18n="waitNone"></option>
+        </select>
+      </label>
+      <label class="field">
+        <span><span data-i18n="speed"></span> · <b id="rateVal">1.00×</b></span>
+        <input type="range" id="rate" min="0.5" max="1.6" step="0.05" value="1">
+      </label>
+      <label class="field">
+        <span><span data-i18n="gap"></span> · <b id="gapVal">0.4 s</b></span>
+        <input type="range" id="gap" min="0" max="3" step="0.1" value="0.4">
+      </label>
+      <label class="field">
+        <span data-i18n="cueMode"></span>
+        <select id="cueMode">
+          <option value="off" data-i18n="cueOff"></option>
+          <option value="3" data-i18n="cue3"></option>
+          <option value="sentence" data-i18n="cueSentence"></option>
+        </select>
+      </label>
+      <label class="field" style="margin-bottom:0">
+        <span data-i18n="stageDir"></span>
+        <select id="stageMode">
+          <option value="skip" data-i18n="stageSkip"></option>
+          <option value="read" data-i18n="stageRead"></option>
+        </select>
+      </label>
+    </section>
+
+    <section class="panel" id="libraryPanel">
+      <h2 data-n="★" data-i18n="pLib"></h2>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn primary wide" id="saveSceneBtn" data-i18n="saveScene"></button>
+      </div>
+      <div class="library" id="library"></div>
+      <p class="hint" id="libHint" data-i18n="pLibHint"></p>
+    </section>
+
+    <section class="panel">
+      <h2 data-n="4" data-i18n="p4"></h2>
+      <div class="row">
+        <button class="btn wide" id="importBtn" data-i18n="importScene"></button>
+        <button class="btn" id="exportBtn" data-i18n="exportScene"></button>
+      </div>
+      <input type="file" id="sceneFile" accept=".zip,.miteatro,application/zip,application/octet-stream" class="sr">
+      <p class="status" id="shareStatus"></p>
+      <p class="hint" data-i18n="p4hint"></p>
+    </section>
+  </div>
+
+  <div class="col-stage">
+    <div class="transport" id="transport" style="display:none">
+      <div class="tbtns">
+        <button class="tbtn" id="prevBtn" title="←"><svg viewBox="0 0 24 24"><path d="M6 5h2.5v14H6zM19 5v14l-11-7z"/></svg></button>
+        <button class="tbtn" id="backBtn" title="⟲"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5.5 5.5 0 1 1-5.5 5.5H4A8 8 0 1 0 12 5z"/></svg></button>
+        <button class="tbtn play" id="playBtn"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 4l13 8-13 8z"/></svg></button>
+        <button class="tbtn" id="stopBtn"><svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg></button>
+        <button class="tbtn" id="nextBtn" title="→"><svg viewBox="0 0 24 24"><path d="M15.5 5H18v14h-2.5zM5 5l11 7-11 7z"/></svg></button>
+        <button class="tbtn" id="loopBtn" title="loop"><svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/></svg></button>
+      </div>
+      <div class="tmeta">
+        <button class="chip" id="toStartBtn"><svg viewBox="0 0 24 24"><path d="M5 5h2.5v14H5zm15 0v14l-11-7z"/></svg></button>
+        <span id="counter">—</span>
+        <div class="seek" id="seek"><div class="progress"><i id="progressBar"></i></div></div>
+        <span id="engineTag">—</span>
+      </div>
+      <div class="tfilter">
+        <span style="font-size:10.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase" data-i18n="onlyHear"></span>
+        <select id="filterChar" style="flex:1"></select>
+        <button class="recmode" id="recModeBtn" title="" aria-pressed="false"><span class="rec-dot"></span> <span data-i18n="recMode"></span></button>
+        <button class="recmode cueonly" id="cueOnlyBtn" aria-pressed="false" title=""><span data-i18n="cueOnlyLabel"></span></button>
+      </div>
+    </div>
+
+    <div class="empty" id="emptyState" data-i18n="emptyState"></div>
+    <div class="script" id="script"></div>
+  </div>
+</main>
+
+<footer>
+  <span data-i18n="footer"></span>
+  <span id="credit"></span>
+</footer>
+
+<!-- more voices -->
+<div class="modal" id="voicesModal">
+  <div class="sheet">
+    <h3 data-i18n="moreVoices"></h3>
+    <p data-i18n="voicesIntro"></p>
+    <div class="note" id="voicesNow"></div>
+    <div id="voiceSteps"></div>
+    <div class="divider"></div>
+    <div class="row">
+      <button class="btn" id="recheckVoices" data-i18n="recheck"></button>
+      <button class="btn primary wide" id="closeVoices" data-i18n="done"></button>
+    </div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="modal" id="settingsModal">
+  <div class="sheet">
+    <h3 data-i18n="settings"></h3>
+    <p data-i18n="settingsIntro"></p>
+
+    <div class="seg">
+      <button id="engBrowser" class="on"><strong data-i18n="engBrowserT"></strong><span data-i18n="engBrowserD"></span></button>
+      <button id="engGemini"><strong data-i18n="engGeminiT"></strong><span data-i18n="engGeminiD"></span></button>
+    </div>
+
+    <div id="browserBox">
+      <div class="note" data-i18n="browserTip"></div>
+      <p class="status" id="voiceCount"></p>
+    </div>
+
+    <div id="geminiBox" style="display:none">
+      <label class="field" style="margin-top:12px">
+        <span data-i18n="apiKeyLabel"></span>
+        <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" spellcheck="false">
+      </label>
+      <label class="field">
+        <span data-i18n="modelLabel"></span>
+        <select id="model">
+          <option value="gemini-2.5-flash-preview-tts">gemini-2.5-flash-preview-tts</option>
+          <option value="gemini-2.5-pro-preview-tts">gemini-2.5-pro-preview-tts</option>
+          <option value="gemini-3.1-flash-tts-preview">gemini-3.1-flash-tts-preview</option>
+        </select>
+      </label>
+      <div class="row">
+        <button class="btn" id="testKey" data-i18n="testKey"></button>
+        <button class="btn ghost" id="forgetKey" data-i18n="forgetKey"></button>
+      </div>
+      <p class="hint" data-i18n="modelHint"></p>
+      <p class="status" id="keyStatus"></p>
+      <div class="note" data-i18n="keySafety"></div>
+      <ol id="keySteps"></ol>
+    </div>
+
+    <div class="divider"></div>
+    <div class="row">
+      <button class="btn ghost" id="clearCache" data-i18n="clearCache"></button>
+      <button class="btn primary wide" id="closeSettings" data-i18n="done"></button>
+    </div>
+    <p class="status" id="cacheStatus"></p>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   Mi Teatro — rehearsal player
+   Single static file. No backend. Nothing leaves your browser except the
+   TTS request you choose to send to Google with your own key.
+   ========================================================================= */
+
+/* =========================================================================
+   TUS DATOS · YOUR DETAILS
+   Editá estas cuatro líneas y nada más. Aparecen al pie de la app.
+   Dejá las comillas vacías ('') en lo que no quieras mostrar.
+   ========================================================================= */
+const AUTHOR = {
+  lab:      'The Creative AI Lab',        // la marca — es lo que se muestra en grande
+  site:     'www.thecreativeailab.com',   // el link del laboratorio
+  name:     '',                           // vacío = no se muestra tu nombre suelto
+  linkedin: '',                           // vacío = no se muestra LinkedIn suelto
+  email:    '',
+  cta:      true                          // muestra "¿Necesitás una herramienta a medida?"
+};
+
+/* MODO ESTUDIO — sólo para vos.
+   Abrí la app con  ?estudio  al final de la dirección para ver las
+   herramientas avanzadas (clave de Gemini, grabar la escena, exportar).
+   Ej: https://mi-teatro.vercel.app/?estudio
+   Queda activado en ese navegador hasta que abras con  ?estudio=0
+   Tus compañeros, entrando por el link normal, no ven nada de eso. */
+let STUDIO = (function(){
+  try{
+    const q = new URLSearchParams(location.search);
+    if (q.has('estudio') || q.has('studio')){
+      const on = q.get('estudio') !== '0' && q.get('studio') !== '0';
+      localStorage.setItem('mt_studio', on ? '1' : '');
+      return on;
+    }
+    return localStorage.getItem('mt_studio') === '1';
+  }catch(e){ return false; }
+})();
+
+/* Secret gesture: tap the "Mi Teatro" title 5 times to toggle studio mode.
+   Works even in the installed app, where the URL can't carry ?estudio. */
+(function(){
+  let taps = 0, timer = null;
+  document.addEventListener('DOMContentLoaded', () => {
+    const h = document.querySelector('.brand h1');
+    if (!h) return;
+    h.style.cursor = 'default';
+    h.addEventListener('click', () => {
+      taps++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { taps = 0; }, 1200);
+      if (taps >= 5){
+        taps = 0;
+        const now = localStorage.getItem('mt_studio') === '1';
+        localStorage.setItem('mt_studio', now ? '' : '1');
+        location.reload();
+      }
+    });
+  });
+})();
+
+/* ------------------------------- i18n ---------------------------------- */
+const I18N = {
+  es:{
+    tagline:'ensayá tus escenas',
+    settings:'Ajustes',
+    p1:'Guion',
+    analyze:'Analizar guion',
+    analyzeRead:'Analizar texto',
+    emptyRead:'Pegá un texto o importá un PDF y tocá «Analizar texto».\nLo parto en fragmentos y los escuchás con una sola voz.',
+    pdf:'PDF',
+    sample:'Ejemplo',
+    clear:'Vaciar',
+    p1hint:'Formato PERSONAJE: diálogo, o formato de guion cinematográfico (el nombre en mayúsculas en su propia línea). Las acotaciones entre paréntesis se detectan solas.',
+    p2:'Reparto',
+    autocast:'Repartir voces distintas',
+    pregen:'Generar audio de la escena',
+    p3:'Ensayo',
+    whenMine:'Cuando toca mi personaje',
+    waitTimed:'Esperar en silencio (según el largo)',
+    waitManual:'Esperar hasta que yo toque «Dicho»',
+    waitNone:'Saltear la línea',
+    speed:'Velocidad',
+    gap:'Pausa entre líneas',
+    cueMode:'Resaltar el pie (antes de mi línea)',
+    cueOff:'No resaltar',
+    cue3:'Últimas 3 palabras (pie clásico)',
+    cueSentence:'Última frase del pie',
+    cueOnlyLabel:'Solo mis pies + mis líneas',
+    cuePrepare:'tu entrada',
+    stageDir:'Acotaciones',
+    stageSkip:'No leerlas',
+    stageRead:'Leerlas',
+    onlyHear:'Escuchar',
+    emptyState:'Pegá un guion arriba y tocá «Analizar guion».\nTe detecto los personajes y les asignás una voz a cada uno.',
+    footer:'Mi Teatro',
+    footerStudio:'Funciona sin servidor: tu guion, tus voces y tu clave se quedan en este navegador.',
+    settingsIntro:'Elegí de dónde salen las voces. Podés cambiar cuando quieras.',
+    engBrowserT:'Voces del sistema',
+    engBrowserD:'Sin configuración, sin internet',
+    engGeminiT:'Voces Gemini',
+    engGeminiD:'30 voces expresivas, con tu clave',
+    browserTip:'Estas voces las pone tu dispositivo, no la app. Para que suenen mucho mejor y gratis: en la computadora abrí Mi Teatro en Microsoft Edge (trae voces neuronales en español). En iPhone: Ajustes › Accesibilidad › Contenido hablado › Voces › Español, y descargá las versiones Mejorada o Premium. En Android: actualizá «Motor de síntesis de voz de Google» y descargá los datos de voz en español.',
+    apiKeyLabel:'Tu clave de Google AI Studio',
+    modelLabel:'Modelo',
+    testKey:'Probar la clave',
+    forgetKey:'Olvidar la clave',
+    keySafety:'La clave se guarda solamente en este navegador y viaja únicamente a Google. No hay servidor de por medio. Una clave del plan gratuito no tiene tarjeta asociada: si alguna vez sospechás algo, la borrás en AI Studio y creás otra en diez segundos. Nunca actives facturación.',
+    keyStepsTitle:'Cómo conseguirla (gratis, 1 minuto):',
+    keySteps:['Entrá a aistudio.google.com/apikey e iniciá sesión con tu cuenta de Google.','Tocá «Create API key» y copiala.','Pegala acá arriba y tocá «Probar la clave».'],
+    clearCache:'Borrar TODO el audio guardado (sintético y mis grabaciones)',
+    done:'Listo',
+    voice:'Voz',
+    style:'Intención',
+    stylePh:'ej: dolida, conteniendo el llanto',
+    preview:'Probar',
+    mute:'Silencio',
+    mine:'Mía',
+    all:'Todos los personajes',
+    lines:'líneas',
+    said:'Dicho',
+    yourLine:'Tu línea',
+    detected:(n,c)=>`${n} líneas · ${c} personajes`,
+    nothing:'No encontré diálogos. Revisá que cada línea tenga el formato PERSONAJE: texto.',
+    reading:'Leyendo el PDF…',
+    pdfFail:'No pude leer ese PDF. Si es un PDF escaneado (una foto), no tiene texto que extraer.',
+    pdfOk:n=>`PDF importado · ${n} caracteres. Revisá el texto y tocá «Analizar guion».`,
+    keyOk:'La clave funciona. Ya podés usar las voces Gemini.',
+    keyBad:'No funcionó: ',
+    keyEmpty:'Pegá una clave primero.',
+    testing:'Probando…',
+    generating:(a,b)=>`Generando audio ${a}/${b}…`,
+    genDone:'Audio listo. Ahora reproduce sin esperas y funciona sin internet.',
+    genStop:'Detener',
+    quota:'Google frenó el pedido por límite del plan gratuito. Esperá un minuto y seguí: lo ya generado queda guardado.',
+    noKey:'Falta tu clave de Gemini. Abrí Ajustes.',
+    cacheCleared:'Audio guardado borrado.',
+    voicesNone:'Tu dispositivo no reportó voces en español. Probá con las voces Gemini o instalá voces del sistema.',
+    voicesFound:n=>`${n} voces en español disponibles en este dispositivo.`,
+    moreVoices:'Más voces',
+    bannerT:'Escuchás una sola voz',
+    bannerD:'Tu dispositivo tiene una sola voz en español, así que todos los personajes suenan igual. Se arregla en dos minutos y es gratis.',
+    bannerBtn:'Ver cómo conseguir más voces',
+    voicesIntro:'Las voces las pone tu dispositivo, no la app. Cuantas más instales, más personajes vas a poder diferenciar. Es gratis y no hace falta ninguna cuenta.',
+    recheck:'Buscar voces de nuevo',
+    nowHave:n=>`Ahora mismo tenés ${n} ${n===1?'voz':'voces'} en este idioma.`,
+    foundNew:n=>`¡Listo! Encontré ${n} ${n===1?'voz nueva':'voces nuevas'}. Ya podés asignarlas en el paso 2.`,
+    foundNothing:n=>`Seguís teniendo ${n} ${n===1?'voz':'voces'}. Si acabás de instalarlas, cerrá el navegador por completo y volvé a abrirlo: recién ahí las ve.`,
+    pLib:'Mis escenas',
+    saveScene:'Guardar esta escena',
+    pLibHint:'⚠ «Mis escenas» vive SOLO en este dispositivo — no se comparte entre tu celular y tu tablet. Para pasar una escena a otro aparato o a un compañero, usá «Exportar» (abajo) y compartí el archivo. Para borrar una de la lista, usá la ✕.',
+    libEmpty:'Todavía no guardaste ninguna escena. Cargá un guion, tocá «Guardar esta escena» y va a aparecer acá para volver a usarla cuando quieras.',
+    askName:'¿Con qué nombre guardo esta escena?',
+    savedOk:n=>`Guardada como «${n}». La vas a encontrar en «Mis escenas».`,
+    srcSynth:'Voz de la app',
+    srcRec:'🎙 Mi voz',
+    recCharNote:'Este personaje se graba con tu voz. En cada línea de abajo vas a ver un botón rojo: tocalo, decí la línea, tocá de nuevo para cortar. Podés regrabar las veces que quieras.',
+    recLine:'Grabar esta línea',
+    recLineStop:'Cortar',
+    micDenied:'No pude usar el micrófono. Revisá que el navegador tenga permiso (el candadito de la barra de dirección).',
+    micWait:'Grabando… tocá de nuevo para cortar',
+    recDoneLine:'Línea grabada. Tocá el botón verde para escucharla o volver a grabar.',
+    recMode:'Grabar',
+    recModeOn:'Modo grabación activo: tocá el botón de cada línea para grabar tu voz. Verde = ya grabada.',
+    recModeTitle:'Activar modo grabación (grabá tu voz línea por línea)',
+    clearRec:'Borrar mi grabación de esta línea (vuelve a la voz asignada)',
+    recCleared:'Grabación borrada. Esa línea vuelve a sonar con la voz asignada.',
+    sceneGone:'No pude abrir esa escena. Puede que se haya borrado el audio guardado. Probá volver a importarla desde el archivo.',
+    withAudio:'con audio',
+    noAudioYet:'sin audio',
+    nLines:n=>`${n} líneas`,
+    confirmDel:n=>`¿Borrar la escena «${n}»? No se puede deshacer.`,
+    overwrite:n=>`Ya tenés una escena llamada «${n}». ¿Reemplazarla?`,
+    p4:'Compartir',
+    importScene:'Abrir escena',
+    exportScene:'Exportar',
+    p4hintSimple:'',
+    p4hint:'📤 EXPORTAR — te descarga tu escena en un archivo .miteatro (guion + todas las voces adentro). Mandáselo a un compañero por WhatsApp o Drive.\n\n📥 ABRIR ESCENA — para escuchar una que te pasaron. El archivo .miteatro es de Mi Teatro y SOLO se abre desde acá: no lo toques en la carpeta (el teléfono no sabe qué es). Guardalo en tu teléfono, tocá «Abrir escena», buscalo en Descargas y elegilo. Guardalo en «Mis escenas» y listo para siempre.',
+    expNoAudio:'Primero generá el audio de la escena (paso 2), si no el archivo va sin voces.',
+    expCounting:'Juntando el audio…',
+    expDone:(n,tot,mb)=>`Escena exportada · ${n} de ${tot} líneas con audio · ${mb} MB`,
+    expEmpty:'No hay ninguna escena para exportar.',
+    impReading:'Abriendo la escena…',
+    impBad:'Ese archivo no es una escena de Mi Teatro.',
+    impDone:(n,c)=>`Escena abierta · ${n} líneas · ${c} personajes. Tocá reproducir.`,
+    bakedTag:'escena',
+    bakedNote:'Esta escena trae el audio incluido: suena sin internet y sin configurar nada.',
+    modeScriptT:'Obra o guion',modeScriptD:'Varios personajes',
+    modeReadT:'Lectura',modeReadD:'Libro o apunte, una sola voz',
+    pdfFrom:'PDF: desde pág.',pdfTo:'hasta',
+    voiceLang:'Idioma de las voces',allLangs:'Todos los idiomas',
+    reader:'LECTOR',
+    del:'Quitar esta línea',
+    langSwitched:l=>`Detecté texto en ${l==='en'?'inglés':'español'} y cambié el idioma de las voces. Podés cambiarlo a mano en el paso 2.`,
+    noVoicesLang:'Tu dispositivo no tiene voces en ese idioma. Tocá «Más voces» para instalarlas.',
+    expNoBaked:'El archivo lleva el guion y el reparto, pero sin audio: las voces del sistema no se pueden grabar. Para exportar con voces, usá voces Gemini y tocá «Generar audio de la escena».',
+    impCast:'Reparto restaurado. Como el archivo no traía audio, se usan las voces de este dispositivo.',
+    cleaned:n=>`Limpié ${n} líneas de relleno (números de página, encabezados, ISBN).`,
+    readChunks:n=>`${n} fragmentos listos para escuchar.`,
+    quotaWait:n=>`Límite del plan gratuito. Reintento solo en ${n} s… (no cierres esta pantalla)`,
+    savedSoFar:(a,b)=>`${a} de ${b} líneas guardadas. Volvé a tocar «Generar audio» cuando quieras: sigue desde donde quedó, sin regenerar lo que ya está.`,
+    quotaGiveUp:'Google sigue frenando los pedidos. Probá con el modelo «flash» o esperá unos minutos. Todo lo generado hasta acá quedó guardado.',
+    modelHint:'Si te da error de límite, usá «flash»: el plan gratuito le permite muchos más pedidos por minuto que a «pro». La diferencia de calidad es mínima para ensayar.',
+    record:'Grabar la escena',
+    recAsk:'Para grabar las voces del sistema, tu navegador te va a pedir compartir la pantalla. Elegí «Toda la pantalla» y MARCÁ LA CASILLA «Compartir el audio del sistema». Sin esa casilla no se graba nada. Durante la grabación vas a escuchar la escena: no hables ni pongas música.',
+    recNoAudio:'No llegó el audio del sistema. Volvé a intentar y acordate de marcar «Compartir el audio del sistema» abajo a la izquierda del cuadro.',
+    recDenied:'Cancelaste la grabación.',
+    recBusy:(a,b)=>`Grabando ${a}/${b}… no hables`,
+    recDone:n=>`${n} líneas grabadas. Ya podés exportar la escena: se va a escuchar igual en cualquier dispositivo.`,
+    recStop:'Detener',
+    recStart:'Empezar a grabar',
+    recCancel:'Cancelar',
+    recTitle:'Grabar la escena con las voces del sistema'
+  },
+  en:{
+    tagline:'rehearse your scenes',
+    settings:'Settings',
+    p1:'Script',
+    analyze:'Analyze script',
+    analyzeRead:'Analyze text',
+    emptyRead:'Paste a text or import a PDF and tap “Analyze text”.\nI’ll split it into chunks read by a single voice.',
+    pdf:'PDF',
+    sample:'Example',
+    clear:'Clear',
+    p1hint:'Use CHARACTER: dialogue, or standard screenplay format (name in caps on its own line). Stage directions in parentheses are detected automatically.',
+    p2:'Cast',
+    autocast:'Give everyone a different voice',
+    pregen:'Generate scene audio',
+    p3:'Rehearsal',
+    whenMine:'When my character speaks',
+    waitTimed:'Wait silently (timed to line length)',
+    waitManual:'Wait until I tap “Said it”',
+    waitNone:'Skip the line',
+    speed:'Speed',
+    gap:'Pause between lines',
+    cueMode:'Highlight the cue (before my line)',
+    cueOff:'Don’t highlight',
+    cue3:'Last 3 words (classic cue)',
+    cueSentence:'Last sentence of the cue',
+    cueOnlyLabel:'Only my cues + my lines',
+    cuePrepare:'your entrance',
+    stageDir:'Stage directions',
+    stageSkip:'Don’t read them',
+    stageRead:'Read them',
+    onlyHear:'Hear',
+    emptyState:'Paste a script above and tap “Analyze script”.\nI’ll find the characters and you cast a voice for each one.',
+    footer:'Mi Teatro',
+    footerStudio:'No server: your script, your voices and your key stay in this browser.',
+    settingsIntro:'Choose where the voices come from. You can switch any time.',
+    engBrowserT:'System voices',
+    engBrowserD:'No setup, works offline',
+    engGeminiT:'Gemini voices',
+    engGeminiD:'30 expressive voices, your key',
+    browserTip:'These voices come from your device, not from the app. To get much better ones for free: on a computer, open Mi Teatro in Microsoft Edge (it ships neural Spanish voices). On iPhone: Settings › Accessibility › Spoken Content › Voices › Spanish, and download the Enhanced or Premium versions. On Android: update Google Text-to-Speech and download the Spanish voice data.',
+    apiKeyLabel:'Your Google AI Studio key',
+    modelLabel:'Model',
+    testKey:'Test the key',
+    forgetKey:'Forget the key',
+    keySafety:'The key is stored only in this browser and is sent only to Google. There is no server in between. A free-tier key has no card attached: if you ever suspect anything, delete it in AI Studio and make a new one in ten seconds. Never enable billing.',
+    keyStepsTitle:'How to get one (free, 1 minute):',
+    keySteps:['Go to aistudio.google.com/apikey and sign in with your Google account.','Tap “Create API key” and copy it.','Paste it above and tap “Test the key”.'],
+    clearCache:'Delete ALL saved audio (synthetic and my recordings)',
+    done:'Done',
+    voice:'Voice',
+    style:'Intention',
+    stylePh:'e.g. hurt, holding back tears',
+    preview:'Preview',
+    mute:'Mute',
+    mine:'Mine',
+    all:'All characters',
+    lines:'lines',
+    said:'Said it',
+    yourLine:'Your line',
+    detected:(n,c)=>`${n} lines · ${c} characters`,
+    nothing:'No dialogue found. Check that each line uses CHARACTER: text.',
+    reading:'Reading the PDF…',
+    pdfFail:'Couldn’t read that PDF. If it’s a scan (a photo), there’s no text to extract.',
+    pdfOk:n=>`PDF imported · ${n} characters. Check the text, then tap “Analyze script”.`,
+    keyOk:'The key works. Gemini voices are ready.',
+    keyBad:'Didn’t work: ',
+    keyEmpty:'Paste a key first.',
+    testing:'Testing…',
+    generating:(a,b)=>`Generating audio ${a}/${b}…`,
+    genDone:'Audio ready. Playback is now instant and works offline.',
+    genStop:'Stop',
+    quota:'Google throttled the request (free-tier limit). Wait a minute and continue: whatever was generated is saved.',
+    noKey:'Your Gemini key is missing. Open Settings.',
+    cacheCleared:'Saved audio deleted.',
+    voicesNone:'Your device reported no Spanish voices. Try Gemini voices or install system voices.',
+    voicesFound:n=>`${n} Spanish voices available on this device.`,
+    moreVoices:'More voices',
+    bannerT:'You only have one voice',
+    bannerD:'Your device has a single Spanish voice, so every character sounds the same. It takes two minutes to fix and it’s free.',
+    bannerBtn:'See how to get more voices',
+    voicesIntro:'Voices come from your device, not from the app. The more you install, the more characters you can tell apart. Free, no account needed.',
+    recheck:'Look for voices again',
+    nowHave:n=>`Right now you have ${n} ${n===1?'voice':'voices'} in this language.`,
+    foundNew:n=>`Done! Found ${n} new ${n===1?'voice':'voices'}. You can assign them in step 2.`,
+    foundNothing:n=>`Still ${n} ${n===1?'voice':'voices'}. If you just installed them, close the browser completely and reopen it: only then does it see them.`,
+    pLib:'My scenes',
+    saveScene:'Save this scene',
+    pLibHint:'⚠ “My scenes” lives ONLY on this device — it isn’t shared between your phone and tablet. To move a scene to another device or a castmate, use “Export” (below) and share the file. To remove one from the list, use the ✕.',
+    libEmpty:'You haven’t saved any scene yet. Load a script, tap “Save this scene” and it will appear here to reuse whenever you like.',
+    askName:'What name should I save this scene under?',
+    savedOk:n=>`Saved as “${n}”. You’ll find it in “My scenes”.`,
+    srcSynth:'App voice',
+    srcRec:'🎙 My voice',
+    recCharNote:'This character uses your own voice. On each line below you’ll see a red button: tap it, say the line, tap again to stop. Re-record as many times as you like.',
+    recLine:'Record this line',
+    recLineStop:'Stop',
+    micDenied:'Couldn’t use the microphone. Check the browser has permission (the padlock in the address bar).',
+    micWait:'Recording… tap again to stop',
+    recDoneLine:'Line recorded. Tap the green button to hear it or record again.',
+    recMode:'Record',
+    recModeOn:'Record mode on: tap each line’s button to record your voice. Green = recorded.',
+    recModeTitle:'Turn on record mode (record your voice line by line)',
+    clearRec:'Delete my recording for this line (back to the assigned voice)',
+    recCleared:'Recording deleted. That line plays with its assigned voice again.',
+    sceneGone:'Couldn’t open that scene. Its saved audio may have been cleared. Try importing it from the file again.',
+    withAudio:'with audio',
+    noAudioYet:'no audio',
+    nLines:n=>`${n} lines`,
+    confirmDel:n=>`Delete the scene “${n}”? This can’t be undone.`,
+    overwrite:n=>`You already have a scene called “${n}”. Replace it?`,
+    p4:'Share',
+    importScene:'Open scene',
+    exportScene:'Export',
+    p4hintSimple:'',
+    p4hint:'📤 EXPORT — downloads your scene as a .miteatro file (script + all voices inside). Send it to a castmate via WhatsApp or Drive.\n\n📥 OPEN SCENE — to hear one you were sent. The .miteatro file belongs to Mi Teatro and only opens from here: don’t tap it in the folder (the phone won’t know what it is). Save it on your phone, tap “Open scene”, find it in Downloads and pick it. Save it to “My scenes” and you’re set.',
+    expNoAudio:'Generate the scene audio first (step 2), otherwise the file ships without voices.',
+    expCounting:'Collecting the audio…',
+    expDone:(n,tot,mb)=>`Scene exported · ${n} of ${tot} lines with audio · ${mb} MB`,
+    expEmpty:'There’s no scene to export.',
+    impReading:'Opening the scene…',
+    impBad:'That file isn’t a Mi Teatro scene.',
+    impDone:(n,c)=>`Scene opened · ${n} lines · ${c} characters. Press play.`,
+    bakedTag:'scene',
+    bakedNote:'This scene ships with its audio: it plays offline with nothing to set up.',
+    modeScriptT:'Play or script',modeScriptD:'Several characters',
+    modeReadT:'Reading',modeReadD:'Book or notes, one voice',
+    pdfFrom:'PDF: from p.',pdfTo:'to',
+    voiceLang:'Voice language',allLangs:'All languages',
+    reader:'READER',
+    del:'Remove this line',
+    langSwitched:l=>`Detected ${l==='en'?'English':'Spanish'} text and switched the voice language. You can change it by hand in step 2.`,
+    noVoicesLang:'Your device has no voices in that language. Tap “More voices” to install them.',
+    expNoBaked:'The file carries the script and the cast, but no audio: system voices can’t be recorded. To export with voices, use Gemini voices and tap “Generate scene audio”.',
+    impCast:'Cast restored. The file carried no audio, so this device’s voices are used.',
+    cleaned:n=>`Removed ${n} filler lines (page numbers, headers, ISBN).`,
+    readChunks:n=>`${n} chunks ready to listen to.`,
+    quotaWait:n=>`Free-tier limit. Retrying on its own in ${n} s… (keep this screen open)`,
+    savedSoFar:(a,b)=>`${a} of ${b} lines saved. Tap “Generate audio” again whenever you like: it picks up where it stopped and never regenerates what's already there.`,
+    quotaGiveUp:'Google keeps throttling. Try the “flash” model or wait a few minutes. Everything generated so far is saved.',
+    modelHint:'If you hit limit errors, use “flash”: the free tier allows far more requests per minute than “pro”. The quality difference is minimal for rehearsal.',
+    record:'Record the scene',
+    recAsk:'To record system voices, your browser will ask you to share your screen. Choose “Entire screen” and TICK “Share system audio”. Without that tick nothing is recorded. You’ll hear the scene while it records: don’t talk or play music.',
+    recNoAudio:'No system audio came through. Try again and remember to tick “Share system audio” at the bottom left of the dialog.',
+    recDenied:'Recording cancelled.',
+    recBusy:(a,b)=>`Recording ${a}/${b}… stay quiet`,
+    recDone:n=>`${n} lines recorded. You can export the scene now: it will sound the same on any device.`,
+    recStop:'Stop',
+    recStart:'Start recording',
+    recCancel:'Cancel',
+    recTitle:'Record the scene with system voices'
+  }
+};
+let LANG = localStorage.getItem('mt_lang') || 'es';
+const t = k => I18N[LANG][k];
+
+/* --------------------------- credit line ------------------------------- */
+function renderCredit(){
+  const el = document.getElementById('credit'); if (!el) return;
+  const es = LANG === 'es';
+  const link = (raw, label) => {
+    const url = /^https?:\/\//.test(raw) ? raw : 'https://' + raw;
+    return `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>`;
+  };
+  const bits = [];
+  // brand first: "Desarrollado por The Creative AI Lab" — the lab name is the link
+  if (AUTHOR.lab){
+    const brand = AUTHOR.site ? link(AUTHOR.site, AUTHOR.lab) : esc(AUTHOR.lab);
+    bits.push((es ? 'Desarrollado por' : 'Built by') + ' ' + brand);
+  } else if (AUTHOR.site){
+    bits.push(link(AUTHOR.site, AUTHOR.site.replace(/^https?:\/\/|^www\./g,'')));
+  }
+  if (AUTHOR.name) bits.push(esc(AUTHOR.name));
+  if (AUTHOR.linkedin) bits.push(link(AUTHOR.linkedin, 'LinkedIn'));
+  if (AUTHOR.email) bits.push(`<a href="mailto:${esc(AUTHOR.email)}">${es ? 'Escribime' : 'Write to me'}</a>`);
+  let html = bits.join(' · ');
+  if (AUTHOR.cta && AUTHOR.site){
+    const cta = es
+      ? '¿Necesitás una herramienta a medida como esta? Hablemos.'
+      : 'Need a custom tool like this one? Let’s talk.';
+    html += `<span class="cta">${link(AUTHOR.site, cta)}</span>`;
+  }
+  el.innerHTML = html;
+}
+
+/* --------------------------- Gemini voices ----------------------------- */
+/* Google's prebuilt voice names. The f/m tag is a hint — use Preview to judge. */
+const GEMINI_VOICES = [
+  ['Zephyr','f'],['Puck','m'],['Charon','m'],['Kore','f'],['Fenrir','m'],['Leda','f'],
+  ['Orus','m'],['Aoede','f'],['Callirrhoe','f'],['Autonoe','f'],['Enceladus','m'],
+  ['Iapetus','m'],['Umbriel','m'],['Algieba','m'],['Despina','f'],['Erinome','f'],
+  ['Algenib','m'],['Rasalgethi','m'],['Laomedeia','f'],['Achernar','f'],['Alnilam','m'],
+  ['Schedar','m'],['Gacrux','f'],['Pulcherrima','f'],['Achird','m'],['Zubenelgenubi','m'],
+  ['Vindemiatrix','f'],['Sadachbia','m'],['Sadaltager','m'],['Sulafat','f']
+];
+const TAPE = ['#FFE24D','#FF6FA5','#6FE3A1','#57D6FF','#FFA24D','#B98CFF','#7EF2D5','#FF9B9B','#C9E265','#8FB8FF'];
+
+const SAMPLE = `MARTA: No apagues la luz todavía.
+JULIÁN: Son las tres de la mañana.
+MARTA: Ya sé qué hora es. (se sienta en el borde de la cama) Hace veinte años que sé qué hora es.
+JULIÁN: Y siempre elegís esta hora para hablar.
+MARTA: Es la única en que no me interrumpe nadie.
+JULIÁN: Te escucho.
+MARTA: No. Me estás esperando. Es distinto.`;
+
+/* ------------------------------- state --------------------------------- */
+const S = {
+  lines: [],
+  chars: {},           // name -> {name,color,voiceURI,gname,style,mute,mine,count}
+  order: [],
+  current: -1,
+  playing: false,
+  paused: false,
+  loop: false,
+  filter: '',
+  engine: localStorage.getItem('mt_engine') || 'browser',
+  apiKey: localStorage.getItem('mt_key') || '',
+  model: localStorage.getItem('mt_model') || 'gemini-2.5-flash-preview-tts',
+  rate: 1, gap: 0.4,
+  waitMode: 'timed',
+  stageMode: 'skip',
+  cueMode: localStorage.getItem('mt_cue') || 'off',   // off | '3' | 'full'
+  cueOnly: false,                                      // only my cues + my lines
+  voices: [],
+  mode: localStorage.getItem('mt_mode') || 'script',
+  recMode: false,
+  voiceLang: localStorage.getItem('mt_vlang') || 'es',
+  textLang: 'es',
+  baked: localStorage.getItem('mt_baked') === '1',
+  token: 0,
+  handle: null,
+  pregenAbort: false
+};
+const $ = id => document.getElementById(id);
+const synth = window.speechSynthesis;
+/* Chrome/Edge need the 15s keepalive; Firefox and Safari are hurt by it. */
+const NEEDS_KEEPALIVE = /Chrome|Chromium|Edg\//.test(navigator.userAgent) && !/Firefox/.test(navigator.userAgent);
+
+/* ------------------------- browser voice list -------------------------- */
+function loadVoices(){
+  const all = synth.getVoices() || [];
+  const want = S.voiceLang;
+  const es = want === 'all' ? all : all.filter(v => (v.lang||'').toLowerCase().startsWith(want));
+  S.voices = es.length ? es : all;
+  const c = $('voiceCount');
+  if (c) { c.textContent = es.length ? t('voicesFound')(es.length) : t('voicesNone'); c.className = 'status' + (es.length ? '' : ' err'); }
+  updateBanner();
+  renderCast();
+}
+loadVoices();
+if (typeof speechSynthesis !== 'undefined') speechSynthesis.onvoiceschanged = loadVoices;
+setTimeout(loadVoices, 900);
+
+/* ------------------- how to install more system voices ----------------- */
+const VOICE_GUIDE = {
+  es:{
+    windows:[
+      {h:'Lo más rápido (30 segundos)', items:[
+        'Abrí Mi Teatro en <kbd>Microsoft Edge</kbd>, el navegador azul que ya viene instalado.',
+        'Edge trae voces neuronales en español, gratis y sin descargar nada. Suenan como personas.',
+        'Volvé acá y tocá «Buscar voces de nuevo».']},
+      {h:'Agregar voces a Windows (sirven en todos los navegadores)', items:[
+        '<kbd>Configuración</kbd> › Hora e idioma › Idioma y región.',
+        '«Agregar idioma» › elegí <b>Español (España)</b>. Repetí con <b>Español (México)</b>, <b>Español (Argentina)</b>, <b>Español (Colombia)</b>…',
+        'En cada idioma agregado tocá <kbd>···</kbd> › Opciones de idioma › y descargá <b>Voz</b>.',
+        'Cerrá y volvé a abrir el navegador.',
+        'Cada variante que agregues suma voces distintas: ese es el truco para que cada personaje suene diferente.']}
+    ],
+    mac:[
+      {h:'Descargar voces en español', items:[
+        '<kbd>Ajustes del Sistema</kbd> › Accesibilidad › Contenido hablado.',
+        'En «Voz del sistema» abrí el menú › <kbd>Gestionar voces…</kbd>',
+        'Buscá Español y descargá varias: Mónica, Paulina, Jorge, Juan, Diego, Marisol. Priorizá las que digan <b>Premium</b> o <b>Mejorada</b>.',
+        'Cerrá y volvé a abrir el navegador.']}
+    ],
+    ios:[
+      {h:'Descargar voces en el iPhone o iPad', items:[
+        '<kbd>Ajustes</kbd> › Accesibilidad › Contenido hablado › Voces.',
+        'Entrá en <b>Español</b> y descargá varias voces distintas, no una sola.',
+        'Las que dicen <b>Premium</b> o <b>Mejorada</b> suenan muchísimo mejor que las básicas. Pesan más, pero valen la pena.',
+        'Volvé al navegador y recargá Mi Teatro.']}
+    ],
+    android:[
+      {h:'Descargar voces en Android', items:[
+        '<kbd>Ajustes</kbd> › buscá «texto a voz» (suele estar en Sistema › Idiomas).',
+        'Motor preferido: <b>Servicios de voz de Google</b>. Tocá el engranaje al lado.',
+        '«Instalar datos de voz» › Español › descargá varias variantes (España, México, Estados Unidos…).',
+        'Volvé al navegador y recargá Mi Teatro. Chrome es el que mejor las reconoce.']}
+    ],
+    other:[
+      {h:'Conseguir más voces', items:[
+        'Las voces se instalan desde la configuración de tu sistema operativo, en la sección de accesibilidad o de idioma.',
+        'Buscá «texto a voz» o «síntesis de voz» y descargá varias voces en español.',
+        'Volvé acá y tocá «Buscar voces de nuevo».']}
+    ]
+  },
+  en:{
+    windows:[
+      {h:'Fastest route (30 seconds)', items:[
+        'Open Mi Teatro in <kbd>Microsoft Edge</kbd>, the blue browser already installed on your PC.',
+        'Edge ships free neural Spanish voices with nothing to download. They sound like people.',
+        'Come back here and tap “Look for voices again”.']},
+      {h:'Add voices to Windows (works in every browser)', items:[
+        '<kbd>Settings</kbd> › Time & language › Language & region.',
+        '“Add a language” › pick <b>Spanish (Spain)</b>. Repeat for <b>Spanish (Mexico)</b>, <b>Spanish (Argentina)</b>, and so on.',
+        'On each added language tap <kbd>···</kbd> › Language options › download <b>Speech</b>.',
+        'Close and reopen your browser.',
+        'Every variant you add brings different voices — that’s the trick for giving each character their own.']}
+    ],
+    mac:[
+      {h:'Download Spanish voices', items:[
+        '<kbd>System Settings</kbd> › Accessibility › Spoken Content.',
+        'Under “System voice” open the menu › <kbd>Manage Voices…</kbd>',
+        'Find Spanish and download several: Mónica, Paulina, Jorge, Juan, Diego, Marisol. Prefer the ones marked <b>Premium</b> or <b>Enhanced</b>.',
+        'Close and reopen your browser.']}
+    ],
+    ios:[
+      {h:'Download voices on iPhone or iPad', items:[
+        '<kbd>Settings</kbd> › Accessibility › Spoken Content › Voices.',
+        'Open <b>Spanish</b> and download several different voices, not just one.',
+        'The ones marked <b>Premium</b> or <b>Enhanced</b> sound far better than the basic ones. Bigger download, worth it.',
+        'Go back to your browser and reload Mi Teatro.']}
+    ],
+    android:[
+      {h:'Download voices on Android', items:[
+        '<kbd>Settings</kbd> › search for “text-to-speech” (usually under System › Languages).',
+        'Preferred engine: <b>Google Speech Services</b>. Tap the gear icon beside it.',
+        '“Install voice data” › Spanish › download several variants.',
+        'Go back to your browser and reload Mi Teatro. Chrome recognises them best.']}
+    ],
+    other:[
+      {h:'Getting more voices', items:[
+        'Voices are installed from your operating system settings, under accessibility or language.',
+        'Search for “text to speech” and download several Spanish voices.',
+        'Come back here and tap “Look for voices again”.']}
+    ]
+  }
+};
+function detectPlatform(){
+  const ua = navigator.userAgent || '';
+  if (/iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  if (/Windows/.test(ua)) return 'windows';
+  if (/Mac OS X|Macintosh/.test(ua)) return 'mac';
+  return 'other';
+}
+function renderVoiceGuide(){
+  const n = S.voices.filter(v => (v.lang||'').toLowerCase().startsWith('es')).length || S.voices.length;
+  $('voicesNow').textContent = t('nowHave')(n);
+  const blocks = VOICE_GUIDE[LANG][detectPlatform()];
+  $('voiceSteps').innerHTML = '<div class="steps">' + blocks.map(b =>
+    `<h4>${b.h}</h4><ol>${b.items.map(i => `<li>${i}</li>`).join('')}</ol>`).join('') + '</div>';
+}
+function updateBanner(){
+  const n = S.voices.filter(v => (v.lang||'').toLowerCase().startsWith('es')).length;
+  const b = $('voiceBanner');
+  if (b) b.style.display = (S.engine === 'browser' && !S.baked && n <= 2) ? '' : 'none';
+}
+
+/* ------------------------------ parser --------------------------------- */
+function parseScript(raw){
+  const src = raw.replace(/\r/g,'').split('\n');
+  const out = [];
+  const looksLikeCue = s => {
+    const b = s.replace(/\([^)]*\)/g,'').replace(/[:.]$/,'').trim();
+    if (!b || b.length > 38) return false;
+    if (b.split(/\s+/).length > 5) return false;
+    const letters = b.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g,'');
+    if (letters.length < 2) return false;
+    return letters === letters.toUpperCase();
+  };
+  for (let i = 0; i < src.length; i++){
+    const line = src[i].trim();
+    if (!line) continue;
+
+    // stage direction on its own line
+    if (/^[(\[].*[)\]]$/.test(line)){
+      out.push({ character:'__STAGE__', text: line.replace(/^[(\[]|[)\]]$/g,'').trim(), stage:true });
+      continue;
+    }
+
+    // CHARACTER: dialogue
+    const ci = line.indexOf(':');
+    if (ci > 0){
+      const head = line.slice(0, ci).trim();
+      const body = line.slice(ci + 1).trim();
+      const words = head.split(/\s+/).length;
+      if (head.length <= 38 && words <= 5 && !/[.!?]$/.test(head) && body){
+        out.push({ character: clean(head), text: body });
+        continue;
+      }
+    }
+
+    // screenplay: NAME alone, dialogue underneath
+    if (looksLikeCue(line)){
+      const who = clean(line.replace(/\([^)]*\)/g,'').replace(/[:.]$/,'').trim());
+      let j = i + 1, buf = [];
+      while (j < src.length){
+        const nx = src[j].trim();
+        if (!nx) break;
+        if (looksLikeCue(nx)) break;
+        if (/^[(\[].*[)\]]$/.test(nx)){ j++; continue; }   // parenthetical: drop
+        buf.push(nx); j++;
+      }
+      if (buf.length){ out.push({ character: who, text: buf.join(' ') }); i = j - 1; continue; }
+    }
+
+    // continuation of the previous speech
+    const last = out[out.length - 1];
+    if (last && !last.stage) last.text += ' ' + line;
+    else out.push({ character:'__STAGE__', text: line, stage:true });
+  }
+  // split trailing inline stage directions out of dialogue? keep inline: actors read them as beats
+  return out;
+}
+function clean(n){ return n.replace(/\s+/g,' ').trim().toUpperCase(); }
+
+/* Reading mode: no characters, just listenable chunks in one voice. */
+const READER = '__READER__';
+function readingParse(text){
+  const paras = text.replace(/\r/g,'').split(/\n\s*\n/)
+    .map(p => p.replace(/\n/g,' ').replace(/\s+/g,' ').trim()).filter(Boolean);
+  const out = [], MAX = 320;
+  paras.forEach(par => {
+    if (par.length <= MAX){ out.push({ character:READER, text:par }); return; }
+    const sents = par.match(/[^.!?…]+[.!?…]+[”"'’)\]]*\s*|[^.!?…]+$/g) || [par];
+    let buf = '';
+    sents.forEach(sn => {
+      if (buf && (buf + sn).length > MAX){ out.push({ character:READER, text:buf.trim() }); buf = sn; }
+      else buf += sn;
+    });
+    if (buf.trim()) out.push({ character:READER, text:buf.trim() });
+  });
+  return out;
+}
+
+/* Strip the noise a book PDF carries: page numbers, running headers, ISBN pages. */
+function cleanBookText(text, aggressive){
+  let removed = 0;
+  let t = text.replace(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])-\n([a-záéíóúüñ])/g, '$1$2'); // de-hyphenate
+  let rows = t.split('\n');
+  const counts = {};
+  rows.forEach(r => { const k = r.trim(); if (k && k.length < 60) counts[k] = (counts[k]||0) + 1; });
+  const junk = /\bISBN\b|©|\(c\)\s*\d{4}|copyright|all rights reserved|derechos reservados|dep[oó]sito legal|printed in|impreso en|primera edici[oó]n|editorial\s|www\.|https?:\/\//i;
+  rows = rows.filter(r => {
+    const k = r.trim();
+    if (!k) return true;
+    if (/^[\divxlcDIVXLC.\-–—\s|]+$/.test(k) && k.length < 12){ removed++; return false; }  // page numbers
+    if (aggressive && junk.test(k)){ removed++; return false; }
+    if (aggressive && k.length < 60 && counts[k] >= 3){ removed++; return false; }            // running headers
+    return true;
+  });
+  return { text: rows.join('\n').replace(/\n{3,}/g,'\n\n').trim(), removed };
+}
+
+/* Rough language sniff so the voice list matches the text. */
+function detectLang(text){
+  const t = ' ' + text.toLowerCase().slice(0, 5000).replace(/[^a-záéíóúüñ\s]/g,' ') + ' ';
+  const en = (t.match(/ (the|and|of|to|is|that|with|for|you|it|was|are|this|have|not) /g) || []).length;
+  const es = (t.match(/ (el|la|los|las|de|que|y|un|una|es|no|se|con|por|para|pero) /g) || []).length;
+  return en > es * 1.2 ? 'en' : 'es';
+}
+
+function analyze(){
+  const raw = $('scriptInput').value;
+  const st = $('parseStatus');
+  if (!raw.trim()){ st.textContent = t('nothing'); st.className = 'status err'; return; }
+
+  // match the voice list to the language of the text
+  let note = '';
+  S.textLang = detectLang(raw);
+  if (S.voiceLang !== 'all' && S.voiceLang !== S.textLang){
+    S.voiceLang = S.textLang;
+    localStorage.setItem('mt_vlang', S.voiceLang);
+    $('voiceLang').value = S.voiceLang;
+    loadVoices();
+    S.order.forEach(nm => { if (S.chars[nm]) S.chars[nm].voiceURI = ''; });
+    note = ' ' + t('langSwitched')(S.textLang);
+  }
+
+  const parsed = S.mode === 'read' ? readingParse(raw) : parseScript(raw);
+  const spoken = parsed.filter(l => !l.stage);
+  if (!spoken.length){ st.textContent = t('nothing'); st.className = 'status err'; return; }
+
+  S.lines = parsed;
+  const names = [];
+  parsed.forEach(l => { if (!l.stage && !names.includes(l.character)) names.push(l.character); });
+
+  const kept = {};
+  names.forEach((n, i) => {
+    const prev = S.chars[n];
+    kept[n] = prev || { name: n, style: '', mute: false, mine: false };
+    kept[n].color = TAPE[i % TAPE.length];
+    // only cast a voice if this character doesn't already have one
+    if (!kept[n].gname) kept[n].gname = GEMINI_VOICES[i % GEMINI_VOICES.length][0];
+    if (!kept[n].voiceURI && S.voices.length) kept[n].voiceURI = S.voices[i % S.voices.length].voiceURI;
+    kept[n].count = parsed.filter(l => l.character === n).length;
+  });
+  S.chars = kept; S.order = names; S.current = -1;
+  if (S.baked){ S.baked = false; localStorage.removeItem('mt_baked'); cacheClearBaked(); }
+
+  st.textContent = (S.mode === 'read' ? t('readChunks')(spoken.length) : t('detected')(spoken.length, names.length)) + note;
+  st.className = 'status ok';
+  $('castPanel').style.display = '';
+  $('rehearsePanel').style.display = '';
+  $('transport').style.display = '';
+  $('emptyState').style.display = 'none';
+  renderCast(); renderScript(); renderFilter(); save(); markRecorded();
+}
+
+/* give each character a different system voice, alternating the list */
+function autoCast(silent){
+  const vs = S.voices;
+  S.order.forEach((n, i) => {
+    const c = S.chars[n];
+    if (vs.length) c.voiceURI = vs[i % vs.length].voiceURI;
+    c.gname = GEMINI_VOICES[i % GEMINI_VOICES.length][0];
+  });
+  if (!silent){ renderCast(); save(); }
+}
+
+/* ------------------------------ rendering ------------------------------ */
+function renderCast(){
+  const box = $('cast'); if (!box) return;
+  if (!S.order.length){ box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  S.order.forEach(n => {
+    const c = S.chars[n];
+    const el = document.createElement('div');
+    el.className = 'char';
+    const voiceOpts = S.engine === 'gemini'
+      ? GEMINI_VOICES.map(([v,g]) => `<option value="${v}" ${c.gname===v?'selected':''}>${v} · ${g==='f'?'♀':'♂'}</option>`).join('')
+      : S.voices.map(v => `<option value="${esc(v.voiceURI)}" ${c.voiceURI===v.voiceURI?'selected':''}>${esc(v.name)}</option>`).join('');
+    el.innerHTML = `
+      <div class="char-head">
+        <i class="tape" style="background:${c.color}"></i>
+        <span class="char-name">${esc(c.name === READER ? t('reader') : c.name)}</span>
+        <span class="char-count">${c.count||0}</span>
+        <button class="mini mine ${c.mine?'on':''}" data-act="mine" data-n="${esc(n)}">${t('mine')}</button>
+        <button class="mini ${c.mute?'on':''}" data-act="mute" data-n="${esc(n)}">${t('mute')}</button>
+      </div>
+      <div class="char-body">
+        <div class="voice-src">
+          <button class="srcbtn ${!c.rec?'on':''}" data-act="src" data-src="synth" data-n="${esc(n)}">${t('srcSynth')}</button>
+          <button class="srcbtn ${c.rec?'on':''}" data-act="src" data-src="rec" data-n="${esc(n)}">${t('srcRec')}</button>
+        </div>
+        ${c.rec ? `<div class="rec-note">${t('recCharNote')}</div>` : `
+        <div class="inline2">
+          <label class="field" style="margin:0">
+            <span>${t('voice')}</span>
+            <select data-act="voice" data-n="${esc(n)}">${voiceOpts}</select>
+          </label>
+          <button class="btn" data-act="preview" data-n="${esc(n)}" style="padding:8px 10px">${t('preview')}</button>
+        </div>
+        ${S.engine==='gemini' ? `<label class="field" style="margin:0">
+          <span>${t('style')}</span>
+          <input type="text" data-act="style" data-n="${esc(n)}" value="${esc(c.style||'')}" placeholder="${t('stylePh')}">
+        </label>` : ''}`}
+      </div>`;
+    box.appendChild(el);
+  });
+  $('pregenBtn').style.display = (STUDIO && S.engine === 'gemini') ? '' : 'none';
+  const vw = $('vlangWrap'); if (vw) vw.style.display = S.engine === 'gemini' ? 'none' : '';
+  const rb = $('recordBtn'); if (rb) rb.style.display = (STUDIO && S.engine !== 'gemini') ? '' : 'none';
+}
+
+function renderScript(){
+  const box = $('script');
+  box.innerHTML = '';
+  S.lines.forEach((l, i) => {
+    const c = S.chars[l.character];
+    const el = document.createElement('div');
+    const cls = ['ln'];
+    if (l.stage) cls.push('stage');
+    if (c && c.mute) cls.push('muted');
+    if (c && c.mine) cls.push('mine');
+    const isCue = !l.stage && S.cueMode !== 'off' && nextSpokenIsMine(i);
+    if (isCue) cls.push('cue-line');
+    if (isSkipped(i)) cls.push('skipped');
+    el.className = cls.join(' ');
+    el.dataset.i = i;
+    if (c){ el.style.borderLeftColor = c.color; el.style.setProperty('--mine', hexA(c.color)); }
+    const cueLabel = l.stage ? '·' : (l.character === READER ? t('reader') : l.character);
+    const canRec = !l.stage && (S.recMode || (c && c.rec));
+    // highlight the cue the way actors actually use it:
+    // last 2-3 words (classic), or the last full sentence when the line is long
+    let txtHtml = esc(l.text);
+    if (isCue){
+      if (S.cueMode === 'sentence'){
+        // split into sentences, highlight only the last one
+        const parts = l.text.match(/[^.!?…]+[.!?…]+[”"'’)\]]*\s*|[^.!?…]+$/g) || [l.text];
+        const lastSentence = parts[parts.length - 1];
+        const head = l.text.slice(0, l.text.length - lastSentence.length);
+        txtHtml = esc(head) + `<mark class="cuew">${esc(lastSentence)}</mark>`;
+      } else {
+        const words = l.text.split(/(\s+)/);           // keep separators
+        const wordIdx = words.map((w,k)=>/\S/.test(w)?k:-1).filter(k=>k>=0);
+        const lastN = wordIdx.slice(-3);
+        txtHtml = words.map((w,k)=> lastN.includes(k) ? `<mark class="cuew">${esc(w)}</mark>` : esc(w)).join('');
+      }
+    }
+    el.innerHTML = `<span class="cue" style="${c?`background:${c.color}`:''}">${esc(cueLabel)}</span>
+                    ${isCue ? `<span class="cue-tag">▸ ${t('cuePrepare')}</span>` : ''}
+                    <p class="txt">${txtHtml}</p>
+                    ${canRec ? `<button class="rec-line" data-rec="${i}" title="${t('recLine')}" aria-label="${t('recLine')}"><span class="rec-dot"></span></button>` : ''}
+                    ${canRec ? `<button class="rec-clear" data-clearrec="${i}" title="${t('clearRec')}" aria-label="${t('clearRec')}">↺</button>` : ''}
+                    ${STUDIO ? `<button class="del" data-del="${i}" title="${t('del')}" aria-label="${t('del')}">✕</button>` : ''}`;
+    el.addEventListener('click', e => {
+      if (e.target.closest('[data-rec]')){ e.stopPropagation(); toggleLineRec(i); return; }
+      if (e.target.closest('[data-clearrec]')){ e.stopPropagation(); clearLineRec(i); return; }
+      if (e.target.closest('[data-del]')){ e.stopPropagation(); removeLine(i); return; }
+      stop(); setCurrent(i);
+    });
+    box.appendChild(el);
+  });
+  paint();
+}
+
+/* Is the next spoken (non-stage) line one of my ("Mía") lines?
+   If so, THIS line is the cue that precedes my entrance. */
+function nextSpokenIsMine(i){
+  for (let j = i + 1; j < S.lines.length; j++){
+    const l = S.lines[j];
+    if (l.stage) continue;
+    const c = S.chars[l.character];
+    return !!(c && c.mine);
+  }
+  return false;
+}
+
+function removeLine(i){
+  stop();
+  S.lines.splice(i, 1);
+  S.order = S.order.filter(nm => S.lines.some(l => l.character === nm));
+  S.order.forEach(nm => { S.chars[nm].count = S.lines.filter(l => l.character === nm).length; });
+  if (S.current >= S.lines.length) S.current = S.lines.length - 1;
+  renderCast(); renderScript(); renderFilter(); save(); markRecorded();
+}
+
+/* Baked audio is keyed by the text itself, so deleting or reordering
+   lines never breaks the match. */
+function bakedKey(text){
+  const str = String(text);
+  let h = 5381; for (let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+  return 'baked:' + h.toString(36) + '_' + str.length;
+}
+
+function renderFilter(){
+  const s = $('filterChar');
+  s.innerHTML = `<option value="">${t('all')}</option>` +
+    S.order.map(n => `<option value="${esc(n)}" ${S.filter===n?'selected':''}>${esc(n)}</option>`).join('');
+}
+
+function paint(){
+  const kids = $('script').children;
+  for (let i = 0; i < kids.length; i++){
+    kids[i].classList.toggle('active', i === S.current);
+    kids[i].classList.toggle('skipped', isSkipped(i));
+  }
+  const total = S.lines.length;
+  $('counter').textContent = total ? `${Math.max(S.current+1,0)} / ${total}` : '—';
+  $('progressBar').style.width = total && S.current >= 0 ? ((S.current+1)/total*100) + '%' : '0';
+  $('engineTag').textContent = S.baked ? t('bakedTag') : (S.engine === 'gemini' ? 'Gemini' : (LANG === 'es' ? 'sistema' : 'system'));
+  $('playIcon').innerHTML = S.playing && !S.paused
+    ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'
+    : '<path d="M7 4l13 8-13 8z"/>';
+}
+
+function setCurrent(i){
+  S.current = i;
+  paint();
+  const el = $('script').children[i];
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+const esc = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const hexA = h => h + '55';
+
+/* --------------------------- playback logic ---------------------------- */
+function isSkipped(i){
+  const l = S.lines[i]; if (!l) return true;
+  if (l.stage) return S.stageMode === 'skip';
+  const c = S.chars[l.character];
+  // "only my cues + my lines": keep my lines and the single cue line before them
+  if (S.cueOnly){
+    const mine = c && c.mine;
+    const isCue = !l.stage && nextSpokenIsMine(i);
+    if (!mine && !isCue) return true;
+  }
+  if (S.filter && l.character !== S.filter) return true;
+  if (c && c.mine && S.waitMode === 'none') return true;
+  return false;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function playFrom(start){
+  const token = ++S.token;
+  S.playing = true; S.paused = false; paint();
+  unlockAudio();
+  for (let i = start; i < S.lines.length; i++){
+    if (token !== S.token) return;
+    if (isSkipped(i)) { continue; }
+    setCurrent(i);
+    const l = S.lines[i];
+    const c = S.chars[l.character];
+    try{
+      if (c && c.mine)      await waitForActor(i, token);
+      else if (c && c.mute) await sleep(120);
+      else                  await speakLine(l, c, token, i);
+    }catch(e){ /* keep the rehearsal going */ }
+    if (token !== S.token) return;
+    if (S.loop){ i--; }
+    await sleep(S.gap * 1000);
+  }
+  if (token === S.token) stop();
+}
+
+async function speakLine(line, chr, token, index){
+  // your own recorded voice always wins if this line has one
+  const myRec = await cacheGet(voiceKey(line.text)).catch(()=>null);
+  if (myRec){ if (token !== S.token) return; return playBlob(myRec); }
+  if (chr && chr.rec) return sleep(150);   // char is "Mi voz" but line not recorded yet
+  // stage directions have no character: read them with a fallback voice
+  if (line.stage){
+    if (S.engine === 'gemini') return speakGemini(line, { gname:'Kore', style:'neutral, como una acotación' }, token);
+    return speakBrowser(line, S.chars[S.order[0]] || null);
+  }
+  // an imported scene carries its own audio: no key, no internet, no setup
+  if (S.baked){
+    const blob = await cacheGet(bakedKey(line.text));
+    if (blob){ if (token !== S.token) return; return playBlob(blob); }
+  }
+  if (S.engine === 'gemini') return speakGemini(line, chr, token);
+  return speakBrowser(line, chr);
+}
+
+function playBlob(blob){
+  return new Promise(resolve => {
+    unlockAudio();
+    const url = URL.createObjectURL(blob);
+    let done = false;
+    const finish = () => { if (done) return; done = true; URL.revokeObjectURL(url); resolve(); };
+    audioEl.src = url;
+    audioEl.playbackRate = S.rate;
+    audioEl.onended = finish; audioEl.onerror = finish;
+    S.handle = {
+      pause: () => audioEl.pause(),
+      resume: () => audioEl.play().catch(()=>{}),
+      cancel: () => { try{ audioEl.pause(); }catch(e){} finish(); }
+    };
+    const p = audioEl.play();
+    if (p && p.catch) p.catch(finish);
+  });
+}
+
+function speakBrowser(line, chr){
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => { if (done) return; done = true; if (ka) clearInterval(ka); resolve(); };
+    const u = new SpeechSynthesisUtterance(line.text);
+    const v = S.voices.find(x => x.voiceURI === (chr && chr.voiceURI));
+    if (v) u.voice = v;
+    u.rate = S.rate; u.pitch = 1;
+    u.onend = finish; u.onerror = finish;
+    /* Chrome silently cuts utterances at ~15s and needs a pause/resume nudge.
+       Firefox and Safari don't — and there the nudge is audible as a gap. */
+    const ka = NEEDS_KEEPALIVE
+      ? setInterval(() => { if (!done && !S.paused && synth.speaking) { synth.pause(); synth.resume(); } }, 9000)
+      : null;
+    S.handle = {
+      pause: () => synth.pause(),
+      resume: () => synth.resume(),
+      cancel: () => { synth.cancel(); finish(); }
+    };
+    try { synth.cancel(); synth.speak(u); } catch(e){ finish(); }
+  });
+}
+
+/* wait for the actor to say their own line out loud */
+function waitForActor(i, token){
+  return new Promise(resolve => {
+    const el = $('script').children[i];
+    const words = S.lines[i].text.split(/\s+/).length;
+    const ms = S.waitMode === 'timed' ? Math.max(1400, (words / 2.4) * 1000 / S.rate) : 0;
+    let elapsed = 0, tick = null, node = null, done = false;
+    const finish = () => {
+      if (done) return; done = true;
+      if (tick) clearInterval(tick);
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      resolve();
+    };
+    if (el){
+      node = document.createElement('div');
+      node.innerHTML = `<div class="waitrow"><span>${t('yourLine')}</span>
+        <button type="button">${t('said')}</button></div>
+        ${S.waitMode==='timed' ? '<div class="waitbar"><i></i></div>' : ''}`;
+      node.querySelector('button').addEventListener('click', e => { e.stopPropagation(); finish(); });
+      el.appendChild(node);
+    }
+    S.handle = { pause(){}, resume(){}, cancel: finish };
+    if (S.waitMode === 'timed'){
+      tick = setInterval(() => {
+        if (token !== S.token) return finish();
+        if (S.paused) return;
+        elapsed += 100;
+        const bar = node && node.querySelector('.waitbar i');
+        if (bar) bar.style.width = Math.min(100, elapsed / ms * 100) + '%';
+        if (elapsed >= ms) finish();
+      }, 100);
+    }
+  });
+}
+
+/* ------------------------- Gemini TTS + cache -------------------------- */
+function keyFor(text, voice, style, model){
+  const s = model + '|' + voice + '|' + style + '|' + text;
+  let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return h.toString(36) + '_' + s.length;
+}
+function openDB(){
+  return new Promise(res => {
+    let r; try { r = indexedDB.open('miteatro', 1); } catch(e){ return res(null); }
+    r.onupgradeneeded = () => { try { r.result.createObjectStore('audio'); } catch(e){} };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => res(null);
+  });
+}
+async function cacheGet(k){
+  const db = await openDB(); if (!db) return null;
+  return new Promise(res => {
+    try{
+      const rq = db.transaction('audio','readonly').objectStore('audio').get(k);
+      rq.onsuccess = () => res(rq.result || null);
+      rq.onerror = () => res(null);
+    }catch(e){ res(null); }
+  });
+}
+async function cacheSet(k, blob){
+  const db = await openDB(); if (!db) return;
+  try { db.transaction('audio','readwrite').objectStore('audio').put(blob, k); } catch(e){}
+}
+async function cacheClear(){
+  const db = await openDB(); if (!db) return;
+  try { db.transaction('audio','readwrite').objectStore('audio').clear(); } catch(e){}
+}
+
+function pcmToWav(bytes, rate){
+  const n = bytes.length, buf = new ArrayBuffer(44 + n), dv = new DataView(buf);
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  str(0,'RIFF'); dv.setUint32(4, 36 + n, true); str(8,'WAVE'); str(12,'fmt ');
+  dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,rate,true); dv.setUint32(28,rate*2,true); dv.setUint16(32,2,true);
+  dv.setUint16(34,16,true); str(36,'data'); dv.setUint32(40,n,true);
+  new Uint8Array(buf, 44).set(bytes);
+  return new Blob([buf], { type:'audio/wav' });
+}
+
+async function fetchGemini(text, voice, style){
+  if (!S.apiKey) throw new Error(t('noKey'));
+  const k = keyFor(text, voice, style, S.model);
+  const hit = await cacheGet(k);
+  if (hit) return hit;
+
+  const en = S.textLang === 'en';
+  const what = S.mode === 'read'
+    ? (en ? 'Read this passage aloud, naturally, as an audiobook narrator' : 'Leé este pasaje en voz alta, con naturalidad, como un narrador de audiolibro')
+    : (en ? 'Read this line of dialogue aloud, naturally' : 'Leé este parlamento de teatro en voz alta, con naturalidad');
+  const prompt = (style && style.trim())
+    ? `${what}, ${en ? 'with this intention' : 'con esta intención'}: ${style.trim()}.\n${en ? 'Text' : 'Texto'}: ${text}`
+    : `${what}.\n${en ? 'Text' : 'Texto'}: ${text}`;
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(S.model)}:generateContent?key=${encodeURIComponent(S.apiKey)}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{ parts:[{ text: prompt }] }],
+        generationConfig:{
+          responseModalities:['AUDIO'],
+          speechConfig:{ voiceConfig:{ prebuiltVoiceConfig:{ voiceName: voice } } }
+        }
+      })
+    });
+  if (!res.ok){
+    let msg = 'HTTP ' + res.status;
+    try { const j = await res.json(); msg = (j.error && j.error.message) || msg; } catch(e){}
+    const err = new Error(msg);
+    err.quota = (res.status === 429);       // keep Google's own wording: it says
+    throw err;                              // whether the limit is per minute or per day
+  }
+  const j = await res.json();
+  const part = j && j.candidates && j.candidates[0] && j.candidates[0].content &&
+               j.candidates[0].content.parts && j.candidates[0].content.parts.find(p => p.inlineData);
+  if (!part) throw new Error('empty response');
+  const b64 = part.inlineData.data;
+  const mime = part.inlineData.mimeType || '';
+  const m = /rate=(\d+)/.exec(mime);
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  const blob = mime.indexOf('L16') >= 0 || mime.indexOf('pcm') >= 0
+    ? pcmToWav(arr, m ? +m[1] : 24000)
+    : new Blob([arr], { type: mime || 'audio/mpeg' });
+  await cacheSet(k, blob);
+  return blob;
+}
+
+let audioEl = null, audioUnlocked = false;
+/* iOS only lets an <audio> element play if it was first started inside a real
+   tap. We start a silent clip on the first tap so later playback works. */
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=';
+function unlockAudio(){
+  if (!audioEl){ audioEl = new Audio(); audioEl.preload = 'auto'; }
+  if (!audioUnlocked){
+    audioUnlocked = true;
+    try { audioEl.src = SILENT_WAV; const p = audioEl.play(); if (p && p.catch) p.catch(()=>{}); } catch(e){}
+  }
+}
+document.addEventListener('touchstart', unlockAudio, { once:true, passive:true });
+function speakGemini(line, chr, token){
+  return new Promise(async (resolve, reject) => {
+    try{
+      const blob = await fetchGemini(line.text, (chr && chr.gname) || 'Kore', (chr && chr.style) || '');
+      if (token !== S.token) return resolve();
+      unlockAudio();
+      const url = URL.createObjectURL(blob);
+      audioEl.src = url;
+      audioEl.playbackRate = S.rate;
+      const done = () => { URL.revokeObjectURL(url); resolve(); };
+      audioEl.onended = done; audioEl.onerror = done;
+      S.handle = {
+        pause: () => audioEl.pause(),
+        resume: () => audioEl.play().catch(()=>{}),
+        cancel: () => { try{ audioEl.pause(); }catch(e){} done(); }
+      };
+      await audioEl.play();
+    }catch(e){
+      const st = $('castStatus');
+      st.textContent = e.quota ? t('quota') + ' — ' + e.message : t('keyBad') + e.message;
+      st.className = 'status err';
+      resolve();
+    }
+  });
+}
+
+/* --------------------- export / import a cast scene -------------------- */
+/* Binary container, no base64 bloat:
+   "MITEATRO1" | uint32 manifest length | manifest JSON | audio bytes back to back */
+const MAGIC = 'MITEATRO1';
+
+async function exportScene(){
+  const st = $('shareStatus');
+  if (!S.lines.length){ st.textContent = t('expEmpty'); st.className = 'status err'; return; }
+  st.textContent = t('expCounting'); st.className = 'status';
+
+  const manifest = {
+    v:2, lang:LANG, mode:S.mode, textLang:S.textLang, voiceLang:S.voiceLang,
+    lines: S.lines.map(l => ({ character:l.character, text:l.text, stage:!!l.stage })),
+    chars: {}, order: S.order,
+    settings: { rate:S.rate, gap:S.gap, waitMode:S.waitMode, stageMode:S.stageMode },
+    audio: []
+  };
+  S.order.forEach(n => {
+    const c = S.chars[n];
+    const sv = S.voices.find(v => v.voiceURI === c.voiceURI);
+    manifest.chars[n] = {
+      name:c.name, color:c.color, gname:c.gname, style:c.style||'', mute:false, mine:false, count:c.count, rec:!!c.rec,
+      voiceURI: c.voiceURI || '', voiceName: sv ? sv.name : '', voiceLang: sv ? sv.lang : ''
+    };
+  });
+
+  const blobs = []; let off = 0, found = 0;
+  const speakable = S.lines.filter(l => !l.stage).length;
+  for (let i = 0; i < S.lines.length; i++){
+    const l = S.lines[i]; if (l.stage) continue;
+    const c = S.chars[l.character] || {};
+    let blob = await cacheGet(voiceKey(l.text)).catch(()=>null);
+    if (!blob) blob = await cacheGet(bakedKey(l.text)).catch(()=>null);
+    if (!blob) blob = await cacheGet(keyFor(l.text, c.gname || 'Kore', c.style || '', S.model)).catch(()=>null);
+    if (!blob) continue;
+    manifest.audio.push({ i, h: bakedKey(l.text), off, len: blob.size, type: blob.type || 'audio/wav' });
+    blobs.push(blob); off += blob.size; found++;
+  }
+
+  const mBytes = new TextEncoder().encode(JSON.stringify(manifest));
+  const head = new Uint8Array(MAGIC.length + 4);
+  for (let i = 0; i < MAGIC.length; i++) head[i] = MAGIC.charCodeAt(i);
+  new DataView(head.buffer).setUint32(MAGIC.length, mBytes.length, true);
+
+  const file = new Blob([head, mBytes, ...blobs], { type:'application/octet-stream' });
+  const url = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'miteatro-' + (S.order[0] ? S.order[0].toLowerCase().replace(/[^a-z0-9]/g,'') : 'escena') + '.miteatro';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+  const mb = (file.size / 1048576).toFixed(1);
+  st.textContent = found ? t('expDone')(found, speakable, mb) : t('expNoBaked');
+  st.className = 'status ' + (found ? 'ok' : 'err');
+}
+
+async function importScene(file){
+  const st = $('shareStatus');
+  st.textContent = t('impReading'); st.className = 'status';
+  try{
+    const buf = await file.arrayBuffer();
+    const dv = new DataView(buf);
+    let magic = '';
+    for (let i = 0; i < MAGIC.length; i++) magic += String.fromCharCode(dv.getUint8(i));
+    if (magic !== MAGIC) throw new Error('bad');
+    const mLen = dv.getUint32(MAGIC.length, true);
+    const mStart = MAGIC.length + 4;
+    const manifest = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, mStart, mLen)));
+    const audioStart = mStart + mLen;
+
+    stop();
+    await cacheClearBaked();
+    for (const a of manifest.audio){
+      const end = audioStart + a.off + a.len;
+      if (end > buf.byteLength) continue;   // skip any audio entry that doesn't fit
+      const bytes = new Uint8Array(buf, audioStart + a.off, a.len);
+      const key = a.h || bakedKey((manifest.lines[a.i] || {}).text || '');
+      await cacheSet(key, new Blob([bytes], { type: a.type || 'audio/wav' }));
+    }
+
+    S.lines = manifest.lines;
+    S.order = manifest.order || [];
+    S.chars = manifest.chars || {};
+    // Clear any old personal recordings for these lines UNLESS the imported scene
+    // itself marks that character as recorded. This stops a stale phone recording
+    // from overriding a freshly imported Edge/synthetic scene with the same text.
+    for (const ln of manifest.lines){
+      if (ln.stage) continue;
+      const ch = (manifest.chars || {})[ln.character];
+      if (!(ch && ch.rec)){
+        await cacheDelete(voiceKey(ln.text)).catch(()=>{});
+      }
+    }
+    // if a character was recorded, mirror its baked audio into the voice: key
+    for (const a of (manifest.audio || [])){
+      const ln = manifest.lines[a.i]; if (!ln) continue;
+      const ch = (manifest.chars || {})[ln.character];
+      if (ch && ch.rec){
+        const bk = await cacheGet(bakedKey(ln.text)).catch(()=>null);
+        if (bk) await cacheSet(voiceKey(ln.text), bk);
+      }
+    }
+    S.mode = manifest.mode || 'script';
+    S.textLang = manifest.textLang || 'es';
+    if (manifest.voiceLang && manifest.voiceLang !== S.voiceLang){
+      S.voiceLang = manifest.voiceLang;
+      localStorage.setItem('mt_vlang', S.voiceLang);
+      $('voiceLang').value = S.voiceLang;
+      loadVoices();
+    }
+    // rebuild the casting on this device: same voice, else same name, else spread them out
+    S.order.forEach((n, i) => {
+      const c = S.chars[n]; if (!c) return;
+      if (!c.color) c.color = TAPE[i % TAPE.length];
+      const byUri  = c.voiceURI  && S.voices.find(v => v.voiceURI === c.voiceURI);
+      const byName = c.voiceName && S.voices.find(v => v.name === c.voiceName);
+      const spread = S.voices[i % (S.voices.length || 1)];
+      c.voiceURI = (byUri || byName || spread || {}).voiceURI || '';
+    });
+    const set = manifest.settings || {};
+    S.rate = set.rate ?? 1; S.gap = set.gap ?? 0.4;
+    S.waitMode = set.waitMode || 'timed'; S.stageMode = set.stageMode || 'skip';
+    S.baked = manifest.audio.length > 0;
+    S.current = -1; S.filter = '';
+    localStorage.setItem('mt_baked', S.baked ? '1' : '');
+
+    $('scriptInput').value = S.lines.map(l => l.stage ? `(${l.text})` : `${l.character}: ${l.text}`).join('\n');
+    $('rate').value = S.rate; $('rateVal').textContent = S.rate.toFixed(2) + '×';
+    $('gap').value = S.gap; $('gapVal').textContent = S.gap.toFixed(1) + ' s';
+    $('waitMode').value = S.waitMode; $('stageMode').value = S.stageMode;
+  if ($('cueMode')) $('cueMode').value = S.cueMode;
+    $('castPanel').style.display = ''; $('rehearsePanel').style.display = '';
+    $('transport').style.display = ''; $('emptyState').style.display = 'none';
+    renderCast(); renderScript(); renderFilter(); updateBanner(); save(); markRecorded();
+
+    const spoken = S.lines.filter(l => !l.stage).length;
+    st.textContent = t('impDone')(spoken, S.order.length) + ' ' + (S.baked ? t('bakedNote') : t('impCast'));
+    st.className = 'status ok';
+    renderLibrary();
+  }catch(e){
+    st.textContent = t('impBad') + ' (' + (e && e.message ? e.message : e) + ')';
+    st.className = 'status err';
+  }
+}
+
+async function cacheClearBaked(){
+  const db = await openDB(); if (!db) return;
+  try{
+    const store = db.transaction('audio','readwrite').objectStore('audio');
+    const rq = store.getAllKeys();
+    rq.onsuccess = () => (rq.result || []).forEach(k => { if (String(k).indexOf('baked:') === 0) store.delete(k); });
+  }catch(e){}
+}
+
+/* ----------------------- record your own voice ------------------------- */
+/* Line-by-line: tap to start, say the line, tap to stop. Stored under
+   voice:<hash> so it survives edits and rides along in exports/library. */
+let micStream = null, lineRec = null, lineRecIdx = -1;
+
+function voiceKey(text){
+  const str = String(text);
+  let h = 5381; for (let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+  return 'voice:' + h.toString(36) + '_' + str.length;
+}
+
+async function getMic(){
+  if (micStream) return micStream;
+  micStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
+  return micStream;
+}
+
+async function toggleLineRec(i){
+  const line = S.lines[i]; if (!line || line.stage) return;
+  const el = $('script').children[i];
+
+  if (lineRec && lineRecIdx === i){ try { lineRec.stop(); } catch(e){} return; }
+  if (lineRec){ try { lineRec.stop(); } catch(e){} await sleep(200); }
+
+  stop();
+  let stream;
+  try { stream = await getMic(); }
+  catch(e){ const st = $('castStatus'); st.textContent = t('micDenied'); st.className = 'status err'; return; }
+
+  let rec;
+  const opts = [];
+  if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported){
+    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) opts.push({ mimeType:'audio/webm;codecs=opus', audioBitsPerSecond:48000 });
+    else if (MediaRecorder.isTypeSupported('audio/mp4')) opts.push({ mimeType:'audio/mp4', audioBitsPerSecond:64000 });
+  }
+  try { rec = new MediaRecorder(stream, opts[0] || undefined); }
+  catch(e){ try { rec = new MediaRecorder(stream); } catch(e2){ return; } }
+  const chunks = [];
+  lineRec = rec; lineRecIdx = i;
+  el.classList.add('recording');
+  const st = $('castStatus'); st.textContent = t('micWait'); st.className = 'status';
+
+  rec.ondataavailable = ev => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+  rec.onstop = async () => {
+    el.classList.remove('recording');
+    lineRec = null; lineRecIdx = -1;
+    if (!chunks.length) return;
+    // keep the compressed recording as-is (Opus/WebM): a fraction of WAV's size,
+    // and voice survives compression well. This is what keeps exports WhatsApp-sized.
+    const raw = new Blob(chunks, { type: chunks[0].type || 'audio/webm' });
+    await cacheSet(voiceKey(line.text), raw);
+    st.textContent = t('recDoneLine'); st.className = 'status ok';
+    markRecorded();
+  };
+  rec.start();
+}
+
+async function clearLineRec(i){
+  const l = S.lines[i]; if (!l) return;
+  await cacheDelete(voiceKey(l.text)).catch(()=>{});
+  const st = $('castStatus'); st.textContent = t('recCleared'); st.className = 'status';
+  markRecorded();
+}
+
+async function markRecorded(){
+  const kids = $('script').children;
+  for (let i = 0; i < kids.length; i++){
+    const l = S.lines[i]; if (!l || l.stage) continue;
+    const c = S.chars[l.character];
+    if (!c || !c.rec){ if (kids[i]) kids[i].classList.remove('has-rec'); continue; }
+    const has = await cacheGet(voiceKey(l.text)).then(b=>!!b).catch(()=>false);
+    if (kids[i]) kids[i].classList.toggle('has-rec', has);
+  }
+}
+
+/* --------------------------- scene library ----------------------------- */
+function libKey(id){ return 'lib:' + id; }
+
+async function buildSceneBlob(){
+  // reuse the exporter's container so a saved scene == an exported scene
+  const manifest = {
+    v:2, lang:LANG, mode:S.mode, textLang:S.textLang, voiceLang:S.voiceLang,
+    lines: S.lines.map(l => ({ character:l.character, text:l.text, stage:!!l.stage })),
+    chars:{}, order:S.order,
+    settings:{ rate:S.rate, gap:S.gap, waitMode:S.waitMode, stageMode:S.stageMode },
+    audio:[]
+  };
+  S.order.forEach(nm => {
+    const c = S.chars[nm]; const sv = S.voices.find(v => v.voiceURI === c.voiceURI);
+    manifest.chars[nm] = { name:c.name, color:c.color, gname:c.gname, style:c.style||'',
+      mute:false, mine:false, count:c.count, rec:!!c.rec,
+      voiceURI:c.voiceURI||'', voiceName: sv?sv.name:'', voiceLang: sv?sv.lang:'' };
+  });
+  const blobs = []; let off = 0;
+  for (let i = 0; i < S.lines.length; i++){
+    const l = S.lines[i]; if (l.stage) continue;
+    const c = S.chars[l.character] || {};
+    let blob = await cacheGet(voiceKey(l.text)).catch(()=>null);
+    if (!blob) blob = await cacheGet(bakedKey(l.text)).catch(()=>null);
+    if (!blob) blob = await cacheGet(keyFor(l.text, c.gname||'Kore', c.style||'', S.model)).catch(()=>null);
+    if (!blob) continue;
+    manifest.audio.push({ i, h: bakedKey(l.text), off, len: blob.size, type: blob.type||'audio/wav' });
+    blobs.push(blob); off += blob.size;
+  }
+  const mBytes = new TextEncoder().encode(JSON.stringify(manifest));
+  const head = new Uint8Array(MAGIC.length + 4);
+  for (let i = 0; i < MAGIC.length; i++) head[i] = MAGIC.charCodeAt(i);
+  new DataView(head.buffer).setUint32(MAGIC.length, mBytes.length, true);
+  return { blob: new Blob([head, mBytes, ...blobs], { type:'application/octet-stream' }),
+           lines: S.lines.filter(l=>!l.stage).length, hasAudio: manifest.audio.length > 0 };
+}
+
+async function libList(){
+  const raw = localStorage.getItem('mt_library');
+  let idx = []; try { idx = JSON.parse(raw) || []; } catch(e){}
+  return idx;
+}
+async function libSaveIndex(idx){ localStorage.setItem('mt_library', JSON.stringify(idx)); }
+
+async function saveScene(){
+  if (!S.lines.length) return;
+  const suggested = (S.order[0] || 'Escena') + (S.order[1] ? ' / ' + S.order[1] : '');
+  const name = (prompt(t('askName'), suggested) || '').trim();
+  if (!name) return;
+  const idx = await libList();
+  const existing = idx.find(e => e.name.toLowerCase() === name.toLowerCase());
+  if (existing && !confirm(t('overwrite')(name))) return;
+
+  const built = await buildSceneBlob();
+  const id = existing ? existing.id : ('s' + Date.now().toString(36));
+  await cacheSet(libKey(id), built.blob);
+  const entry = { id, name, lines: built.lines, hasAudio: built.hasAudio, at: Date.now() };
+  const next = existing ? idx.map(e => e.id === id ? entry : e) : [entry, ...idx];
+  await libSaveIndex(next);
+  renderLibrary();
+  const st = $('shareStatus'); st.textContent = t('savedOk')(name); st.className = 'status ok';
+}
+
+async function openSavedScene(id){
+  const st = $('shareStatus');
+  let blob = null;
+  try { blob = await cacheGet(libKey(id)); } catch(e){}
+  if (!blob){ st.textContent = t('sceneGone'); st.className = 'status err'; return; }
+  // full reset first, so switching scenes never carries state over
+  stop();
+  S.lines = []; S.chars = {}; S.order = []; S.current = -1; S.filter = ''; S.recMode = false;
+  const rmb = $('recModeBtn'); if (rmb) rmb.classList.remove('on');
+  const file = new File([blob], 'scene.miteatro', { type:'application/octet-stream' });
+  await importScene(file);
+}
+
+async function deleteScene(id, name){
+  if (!confirm(t('confirmDel')(name))) return;
+  const idx = await libList();
+  await libSaveIndex(idx.filter(e => e.id !== id));
+  try { await cacheDelete(libKey(id)); } catch(e){}
+  renderLibrary();
+}
+
+async function cacheDelete(k){
+  const db = await openDB(); if (!db) return;
+  try { db.transaction('audio','readwrite').objectStore('audio').delete(k); } catch(e){}
+}
+
+async function renderLibrary(){
+  const box = $('library'); if (!box) return;
+  const idx = await libList();
+  if (!idx.length){ box.innerHTML = `<div class="lib-empty">${t('libEmpty')}</div>`; return; }
+  box.innerHTML = '';
+  idx.forEach(e => {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    const audio = e.hasAudio
+      ? `<span class="li-audio">● ${t('withAudio')}</span>`
+      : `<span>○ ${t('noAudioYet')}</span>`;
+    el.innerHTML = `<div class="li-body">
+        <div class="li-name">${esc(e.name)}</div>
+        <div class="li-meta">${t('nLines')(e.lines)} · ${audio}</div>
+      </div>
+      <button class="li-del" title="✕" aria-label="borrar">✕</button>`;
+    el.addEventListener('click', ev => {
+      if (ev.target.closest('.li-del')){ ev.stopPropagation(); deleteScene(e.id, e.name); return; }
+      openSavedScene(e.id);
+    });
+    box.appendChild(el);
+  });
+}
+
+/* ------------- record system voices into the scene file ---------------- */
+/* Web Speech voices can't be read directly, but they can be captured from
+   the system audio the browser is already allowed to share. */
+let recAbort = false;
+
+function toWav(audioBuffer, targetRate){
+  const src = audioBuffer.getChannelData(0);
+  const ratio = audioBuffer.sampleRate / targetRate;
+  const outLen = Math.floor(src.length / ratio);
+  const f = new Float32Array(outLen);
+  for (let i = 0; i < outLen; i++) f[i] = src[Math.floor(i * ratio)];
+
+  // trim the silence around the line
+  const TH = 0.008;
+  let a = 0, b = f.length - 1;
+  while (a < b && Math.abs(f[a]) < TH) a++;
+  while (b > a && Math.abs(f[b]) < TH) b--;
+  a = Math.max(0, a - Math.floor(targetRate * 0.08));
+  b = Math.min(f.length - 1, b + Math.floor(targetRate * 0.12));
+  const cut = f.subarray(a, b + 1);
+
+  const bytes = new Uint8Array(cut.length * 2);
+  const dv = new DataView(bytes.buffer);
+  for (let i = 0; i < cut.length; i++){
+    let v = Math.max(-1, Math.min(1, cut[i]));
+    dv.setInt16(i * 2, v < 0 ? v * 32768 : v * 32767, true);
+  }
+  return pcmToWav(bytes, targetRate);
+}
+
+function recordOne(stream, line, chr){
+  return new Promise(async resolve => {
+    let rec;
+    try { rec = new MediaRecorder(stream); } catch(e){ return resolve(null); }
+    const chunks = [];
+    rec.ondataavailable = ev => { if (ev.data && ev.data.size) chunks.push(ev.data); };
+    rec.onstop = () => resolve(chunks.length ? new Blob(chunks, { type: chunks[0].type || 'audio/webm' }) : null);
+    rec.start();
+    await sleep(150);
+    await speakBrowser(line, chr);
+    await sleep(350);
+    try { rec.stop(); } catch(e){ resolve(null); }
+  });
+}
+
+async function recordScene(){
+  const st = $('castStatus'), btn = $('recordBtn');
+  if (!S.lines.length) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || typeof MediaRecorder === 'undefined'){
+    st.textContent = t('recNoAudio'); st.className = 'status err'; return;
+  }
+  if (!confirm(t('recAsk'))) return;
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video:true, audio:true });
+  } catch(e){ st.textContent = t('recDenied'); st.className = 'status err'; return; }
+
+  const audioTracks = stream.getAudioTracks();
+  if (!audioTracks.length){
+    stream.getTracks().forEach(tr => tr.stop());
+    st.textContent = t('recNoAudio'); st.className = 'status err'; return;
+  }
+  stream.getVideoTracks().forEach(tr => tr.stop());          // we only need the sound
+  const audioOnly = new MediaStream(audioTracks);
+
+  recAbort = false;
+  const label = btn.textContent;
+  btn.textContent = t('recStop');
+  const onStop = () => { recAbort = true; };
+  btn.addEventListener('click', onStop);
+
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  const todo = S.lines.map((l, i) => ({ l, i })).filter(x => !x.l.stage);
+  let done = 0;
+  stop();
+
+  for (let k = 0; k < todo.length; k++){
+    if (recAbort) break;
+    st.textContent = t('recBusy')(k + 1, todo.length); st.className = 'status';
+    setCurrent(todo[k].i);
+    const l = todo[k].l, c = S.chars[l.character] || {};
+    const raw = await recordOne(audioOnly, l, c);
+    if (raw && raw.size > 800){
+      try {
+        const buf = await ac.decodeAudioData(await raw.arrayBuffer());
+        await cacheSet(bakedKey(l.text), toWav(buf, 24000));
+        done++;
+      } catch(e){ /* skip this line, keep going */ }
+    }
+  }
+
+  audioTracks.forEach(tr => tr.stop());
+  try { ac.close(); } catch(e){}
+  btn.removeEventListener('click', onStop);
+  btn.textContent = label;
+  stop();
+
+  if (done){
+    S.baked = true; localStorage.setItem('mt_baked', '1');
+    st.textContent = t('recDone')(done); st.className = 'status ok';
+    paint();
+  } else {
+    st.textContent = t('recNoAudio'); st.className = 'status err';
+  }
+}
+
+/* ------------------------------ controls ------------------------------- */
+function play(){
+  if (!S.lines.length) return;
+  if (S.playing && !S.paused) return pause();
+  if (S.paused){
+    S.paused = false; S.playing = true;
+    if (S.handle) S.handle.resume();
+    paint(); return;
+  }
+  let start = S.current >= 0 ? S.current : 0;
+  playFrom(start);
+}
+function pause(){
+  if (!S.playing) return;
+  S.paused = true; S.playing = false;
+  if (S.handle) S.handle.pause();
+  paint();
+}
+function stop(){
+  S.token++;
+  S.playing = false; S.paused = false;
+  try{ synth.cancel(); }catch(e){}
+  if (audioEl){ try{ audioEl.pause(); }catch(e){} }
+  S.handle = null;
+  paint();
+}
+function step(dir){
+  let i = S.current;
+  do { i += dir; } while (i >= 0 && i < S.lines.length && isSkipped(i));
+  if (i < 0 || i >= S.lines.length) return;
+  const wasPlaying = S.playing;
+  stop(); setCurrent(i);
+  if (wasPlaying) playFrom(i);
+}
+function repeatLine(){
+  if (S.current < 0) return;
+  const i = S.current; stop(); playFrom(i);
+}
+
+/* ------------------------- pre-generate a scene ------------------------ */
+async function pregen(){
+  if (S.engine !== 'gemini') return;
+  if (!S.apiKey){ $('castStatus').textContent = t('noKey'); $('castStatus').className = 'status err'; return; }
+  // every spoken line, ignoring mute/mine/filter, so an exported scene is complete
+  const todo = S.lines.map((l,i)=>({l,i})).filter(x => !x.l.stage);
+  S.pregenAbort = false;
+  let ok = 0;
+  const btn = $('pregenBtn'), st = $('castStatus'), label = btn.textContent;
+  btn.textContent = t('genStop');
+  const onStop = () => { S.pregenAbort = true; };
+  btn.addEventListener('click', onStop);
+  for (let n = 0; n < todo.length; n++){
+    if (S.pregenAbort) break;
+    st.textContent = t('generating')(n + 1, todo.length); st.className = 'status';
+    const l = todo[n].l, c = S.chars[l.character] || {};
+    // already generated in an earlier session? skip it instantly
+    const already = await cacheGet(keyFor(l.text, c.gname || 'Kore', c.style || '', S.model)).catch(() => null);
+    if (already){ ok++; continue; }
+    let attempt = 0, fatal = false;
+    while (true){
+      try { await fetchGemini(l.text, c.gname || 'Kore', c.style || ''); ok++; break; }
+      catch(e){
+        if (e.quota && attempt < 4 && !S.pregenAbort){
+          attempt++;
+          st.className = 'status';
+          for (let w = 20 + attempt * 10; w > 0 && !S.pregenAbort; w--){
+            st.textContent = t('quotaWait')(w);
+            await sleep(1000);
+          }
+          continue;   // the free tier resets per minute, so just wait it out
+        }
+        st.textContent = (e.quota ? t('quotaGiveUp') : t('keyBad')) + ' — ' + e.message + ' · ' + t('savedSoFar')(ok, todo.length);
+        st.className = 'status err'; fatal = true; break;
+      }
+    }
+    if (fatal || S.pregenAbort) break;
+    await sleep(1400);   // stay friendly with free-tier rate limits
+  }
+  btn.removeEventListener('click', onStop);
+  btn.textContent = label;
+  if (!S.pregenAbort && st.className !== 'status err'){
+    st.textContent = t('genDone') + ' ' + t('savedSoFar')(ok, todo.length);
+    st.className = 'status ok';
+  }
+}
+
+/* ------------------------------- events -------------------------------- */
+$('analyzeBtn').addEventListener('click', analyze);
+$('sampleBtn').addEventListener('click', () => { $('scriptInput').value = SAMPLE; analyze(); });
+$('clearBtn').addEventListener('click', () => {
+  stop(); $('scriptInput').value = ''; S.lines = []; S.chars = {}; S.order = []; S.current = -1;
+  $('script').innerHTML = ''; $('emptyState').style.display = '';
+  $('castPanel').style.display = 'none'; $('rehearsePanel').style.display = 'none';
+  $('transport').style.display = 'none'; $('parseStatus').textContent = '';
+  S.baked = false; localStorage.removeItem('mt_baked'); cacheClearBaked(); updateBanner(); save();
+});
+
+$('cast').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const n = b.dataset.n, c = S.chars[n]; if (!c) return;
+  if (b.dataset.act === 'mute'){ c.mute = !c.mute; renderCast(); renderScript(); save(); }
+  if (b.dataset.act === 'mine'){ c.mine = !c.mine; if (c.mine) c.mute = false; renderCast(); renderScript(); save(); }
+  if (b.dataset.act === 'src'){ c.rec = (b.dataset.src === 'rec'); renderCast(); renderScript(); save(); markRecorded(); }
+  if (b.dataset.act === 'preview'){
+    stop();
+    const demo = { text: LANG === 'es' ? 'Así voy a sonar en tu escena. Probá si te sirve para este personaje.' : 'This is how I will sound in your scene.' , stage:false };
+    S.token++; const tk = S.token;
+    speakLine(demo, c, tk, -1);
+  }
+});
+$('cast').addEventListener('change', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const c = S.chars[el.dataset.n]; if (!c) return;
+  if (el.dataset.act === 'voice'){ if (S.engine === 'gemini') c.gname = el.value; else c.voiceURI = el.value; save(); }
+});
+$('cast').addEventListener('input', e => {
+  const el = e.target.closest('[data-act="style"]'); if (!el) return;
+  const c = S.chars[el.dataset.n]; if (c){ c.style = el.value; save(); }
+});
+$('autoCastBtn').addEventListener('click', () => autoCast(false));
+function setMode(m){
+  S.mode = m; localStorage.setItem('mt_mode', m);
+  $('modeScript').classList.toggle('on', m === 'script');
+  $('modeRead').classList.toggle('on', m === 'read');
+  $('analyzeBtn').textContent = m === 'read' ? t('analyzeRead') : t('analyze');
+  $('emptyState').textContent = m === 'read' ? t('emptyRead') : t('emptyState');
+}
+$('modeScript').addEventListener('click', () => setMode('script'));
+$('modeRead').addEventListener('click', () => setMode('read'));
+$('voiceLang').addEventListener('change', e => {
+  S.voiceLang = e.target.value; localStorage.setItem('mt_vlang', S.voiceLang);
+  loadVoices();
+  const st = $('castStatus');
+  if (!S.voices.length || (S.voiceLang !== 'all' && !S.voices.some(v => (v.lang||'').toLowerCase().startsWith(S.voiceLang)))){
+    st.textContent = t('noVoicesLang'); st.className = 'status err';
+  } else { st.textContent = ''; st.className = 'status'; }
+  S.order.forEach((nm, i) => { const c = S.chars[nm]; if (c && S.voices.length) c.voiceURI = S.voices[i % S.voices.length].voiceURI; });
+  renderCast(); save();
+});
+$('pregenBtn').addEventListener('click', pregen);
+$('recordBtn').addEventListener('click', recordScene);
+
+/* share + voices */
+$('exportBtn').addEventListener('click', exportScene);
+$('saveSceneBtn').addEventListener('click', saveScene);
+$('importBtn').addEventListener('click', () => $('sceneFile').click());
+$('sceneFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) importScene(f);
+  e.target.value = '';
+});
+const vModal = $('voicesModal');
+$('openVoices').addEventListener('click', () => { loadVoices(); renderVoiceGuide(); vModal.classList.add('open'); });
+$('bannerBtn').addEventListener('click', () => { loadVoices(); renderVoiceGuide(); vModal.classList.add('open'); });
+$('closeVoices').addEventListener('click', () => vModal.classList.remove('open'));
+vModal.addEventListener('click', e => { if (e.target === vModal) vModal.classList.remove('open'); });
+$('recheckVoices').addEventListener('click', () => {
+  const before = S.voices.length;
+  loadVoices(); renderVoiceGuide();
+  const after = S.voices.length;
+  const box = $('voicesNow');
+  box.textContent = after > before
+    ? t('foundNew')(after - before)
+    : t('foundNothing')(after);
+});
+
+/* seek bar: click or drag anywhere to jump */
+let seekDrag = false, seekWasPlaying = false;
+function seekTo(e){
+  if (!S.lines.length) return;
+  const r = $('seek').getBoundingClientRect();
+  const p = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  const i = Math.min(S.lines.length - 1, Math.floor(p * S.lines.length));
+  if (i !== S.current) setCurrent(i);
+}
+$('seek').addEventListener('pointerdown', e => {
+  if (!S.lines.length) return;
+  seekDrag = true; seekWasPlaying = S.playing;
+  stop();
+  try { $('seek').setPointerCapture(e.pointerId); } catch(err){}
+  seekTo(e);
+});
+$('seek').addEventListener('pointermove', e => { if (seekDrag) seekTo(e); });
+function endSeek(){
+  if (!seekDrag) return;
+  seekDrag = false;
+  if (seekWasPlaying && S.current >= 0) playFrom(S.current);
+}
+$('seek').addEventListener('pointerup', endSeek);
+$('seek').addEventListener('pointercancel', endSeek);
+
+$('toStartBtn').addEventListener('click', () => {
+  const wasPlaying = S.playing;
+  stop(); setCurrent(0);
+  if (wasPlaying) playFrom(0);
+});
+
+$('playBtn').addEventListener('click', play);
+$('stopBtn').addEventListener('click', () => { stop(); });
+$('prevBtn').addEventListener('click', () => step(-1));
+$('nextBtn').addEventListener('click', () => step(1));
+$('backBtn').addEventListener('click', repeatLine);
+$('loopBtn').addEventListener('click', () => { S.loop = !S.loop; $('loopBtn').classList.toggle('on', S.loop); });
+$('cueOnlyBtn').addEventListener('click', () => {
+  S.cueOnly = !S.cueOnly;
+  $('cueOnlyBtn').classList.toggle('on', S.cueOnly);
+  $('cueOnlyBtn').setAttribute('aria-pressed', S.cueOnly ? 'true' : 'false');
+  stop(); renderScript(); markRecorded();
+});
+$('recModeBtn').addEventListener('click', () => {
+  S.recMode = !S.recMode;
+  const b = $('recModeBtn');
+  b.classList.toggle('on', S.recMode);
+  b.setAttribute('aria-pressed', S.recMode ? 'true' : 'false');
+  const st = $('castStatus');
+  if (S.recMode){ st.textContent = t('recModeOn'); st.className = 'status'; }
+  else { st.textContent = ''; st.className = 'status'; }
+  renderScript(); markRecorded();
+});
+$('filterChar').addEventListener('change', e => { S.filter = e.target.value; stop(); renderScript(); save(); });
+
+$('rate').addEventListener('input', e => { S.rate = +e.target.value; $('rateVal').textContent = S.rate.toFixed(2) + '×'; save(); });
+$('gap').addEventListener('input', e => { S.gap = +e.target.value; $('gapVal').textContent = S.gap.toFixed(1) + ' s'; save(); });
+$('waitMode').addEventListener('change', e => { S.waitMode = e.target.value; renderScript(); save(); });
+$('stageMode').addEventListener('change', e => { S.stageMode = e.target.value; renderScript(); save(); });
+$('cueMode').addEventListener('change', e => {
+  S.cueMode = e.target.value; localStorage.setItem('mt_cue', S.cueMode);
+  renderScript(); markRecorded(); save();
+});
+
+document.addEventListener('keydown', e => {
+  if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if (e.code === 'Space'){ e.preventDefault(); play(); }
+  if (e.code === 'ArrowRight') step(1);
+  if (e.code === 'ArrowLeft') step(-1);
+  if (e.code === 'KeyR') repeatLine();
+});
+
+/* PDF import */
+$('pdfBtn').addEventListener('click', () => $('pdfFile').click());
+$('pdfFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const st = $('parseStatus'); st.textContent = t('reading'); st.className = 'status';
+  try{
+    await loadPdfJs();
+    const buf = await f.arrayBuffer();
+    const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+    let text = '';
+    const from = Math.max(1, parseInt($('pdfStart').value, 10) || 1);
+    const to = Math.min(pdf.numPages, parseInt($('pdfEnd').value, 10) || pdf.numPages);
+    for (let p = from; p <= to; p++){
+      const page = await pdf.getPage(p);
+      const c = await page.getTextContent();
+      let last = null, out = '';
+      c.items.forEach(it => {
+        const y = it.transform[5];
+        if (last !== null && Math.abs(y - last) > 3) out += '\n';
+        out += it.str;
+        last = y;
+      });
+      text += out + '\n';
+    }
+    const cleaned = cleanBookText(text, S.mode === 'read');
+    $('scriptInput').value = cleaned.text;
+    st.textContent = t('pdfOk')(cleaned.text.length) + (cleaned.removed ? ' ' + t('cleaned')(cleaned.removed) : '');
+    st.className = 'status ok';
+  }catch(err){ st.textContent = t('pdfFail'); st.className = 'status err'; }
+  e.target.value = '';
+});
+function loadPdfJs(){
+  if (window.pdfjsLib) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      res();
+    };
+    s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+/* settings */
+const modal = $('settingsModal');
+$('openSettings').addEventListener('click', () => { modal.classList.add('open'); loadVoices(); });
+$('closeSettings').addEventListener('click', () => modal.classList.remove('open'));
+modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+function setEngine(v){
+  S.engine = v; localStorage.setItem('mt_engine', v);
+  $('engBrowser').classList.toggle('on', v === 'browser');
+  $('engGemini').classList.toggle('on', v === 'gemini');
+  $('browserBox').style.display = v === 'browser' ? '' : 'none';
+  $('geminiBox').style.display = v === 'gemini' ? '' : 'none';
+  stop(); renderCast(); paint(); updateBanner();
+}
+$('engBrowser').addEventListener('click', () => setEngine('browser'));
+$('engGemini').addEventListener('click', () => setEngine('gemini'));
+$('apiKey').addEventListener('input', e => { S.apiKey = e.target.value.trim(); localStorage.setItem('mt_key', S.apiKey); });
+$('model').addEventListener('change', e => { S.model = e.target.value; localStorage.setItem('mt_model', S.model); });
+$('forgetKey').addEventListener('click', () => {
+  S.apiKey = ''; $('apiKey').value = ''; localStorage.removeItem('mt_key');
+  $('keyStatus').textContent = ''; $('keyStatus').className = 'status';
+});
+$('testKey').addEventListener('click', async () => {
+  const st = $('keyStatus');
+  if (!S.apiKey){ st.textContent = t('keyEmpty'); st.className = 'status err'; return; }
+  st.textContent = t('testing'); st.className = 'status';
+  try{
+    const blob = await fetchGemini(LANG === 'es' ? 'Hola. Todo listo para ensayar.' : 'Hello. Ready to rehearse.', 'Kore', '');
+    unlockAudio(); const url = URL.createObjectURL(blob);
+    audioEl.src = url; audioEl.play().catch(()=>{});
+    st.textContent = t('keyOk'); st.className = 'status ok';
+  }catch(e){
+    st.textContent = e.quota ? t('quota') + ' — ' + e.message : t('keyBad') + e.message;
+    st.className = 'status err';
+  }
+});
+$('clearCache').addEventListener('click', async () => {
+  await cacheClear();
+  $('cacheStatus').textContent = t('cacheCleared'); $('cacheStatus').className = 'status ok';
+});
+
+/* Simple mode for everyone else: no key, no recording, no export.
+   They open the link, paste a script or open a scene, and press play. */
+function applyStudio(){
+  const hide = el => { if (el) el.style.display = 'none'; };
+  if (STUDIO){
+    const b = $('studioBadge');
+    b.style.display = '';
+    b.title = LANG === 'es'
+      ? 'Estás en modo estudio. Tocá para salir y ver la app como la ven tus compañeros.'
+      : 'You are in studio mode. Tap to leave and see the app as your castmates do.';
+    b.addEventListener('click', () => {
+      localStorage.setItem('mt_studio', '');
+      location.href = location.pathname;
+    });
+    return;
+  }
+  // Visitors CAN: record their own voice (mic), export, save to library, import.
+  // Visitors CANNOT: open Settings (Gemini key), capture Edge system voices.
+  hide($('openSettings'));      // Gemini key + engine — studio only
+  hide($('pregenBtn'));         // Gemini bulk generation — studio only
+  hide($('recordBtn'));         // Edge screen-capture — studio only
+  // exportBtn and recModeBtn stay visible: everyone can record and share
+  if (S.engine !== 'browser') setEngine('browser');
+}
+
+/* language */
+function applyLang(){
+  document.documentElement.lang = LANG;
+  localStorage.setItem('mt_lang', LANG);
+  $('langEs').classList.toggle('on', LANG === 'es');
+  $('langEn').classList.toggle('on', LANG === 'en');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = I18N[LANG][el.dataset.i18n];
+    if (typeof v === 'string') el.textContent = v;
+  });
+  const fEl = document.querySelector('[data-i18n="footer"]');
+  if (fEl) fEl.textContent = STUDIO ? (t('footer') + ' · ' + t('footerStudio')) : t('footer');
+  const rmb = $('recModeBtn'); if (rmb) rmb.title = t('recModeTitle');
+  $('toStartBtn').title = LANG === 'es' ? 'Volver al principio' : 'Back to the start';
+  $('toStartBtn').setAttribute('aria-label', $('toStartBtn').title);
+  $('scriptInput').placeholder = LANG === 'es'
+    ? 'MARTA: No apagues la luz todavía.\nJULIÁN: Son las tres de la mañana.'
+    : 'MARTA: Don’t turn off the light yet.\nJULIÁN: It’s three in the morning.';
+  const ol = $('keySteps');
+  ol.innerHTML = `<li style="list-style:none;margin-left:-18px;margin-bottom:4px;color:var(--ink)">${t('keyStepsTitle')}</li>` +
+                 I18N[LANG].keySteps.map(s => `<li>${s}</li>`).join('');
+  renderCast(); renderFilter(); paint(); renderCredit(); setMode(S.mode); renderLibrary();
+  if (document.getElementById('voiceSteps').innerHTML) renderVoiceGuide();
+}
+$('langEs').addEventListener('click', () => { LANG = 'es'; applyLang(); });
+$('langEn').addEventListener('click', () => { LANG = 'en'; applyLang(); });
+
+/* persistence */
+function save(){
+  try{
+    localStorage.setItem('mt_state', JSON.stringify({
+      text: $('scriptInput').value, chars: S.chars, order: S.order,
+      rate: S.rate, gap: S.gap, waitMode: S.waitMode, stageMode: S.stageMode, filter: S.filter,
+      mode: S.mode, textLang: S.textLang, cueMode: S.cueMode
+    }));
+  }catch(e){}
+}
+function restore(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem('mt_state') || 'null'); }catch(e){}
+  if (!d) return;
+  $('scriptInput').value = d.text || '';
+  S.rate = d.rate ?? 1; S.gap = d.gap ?? 0.4;
+  S.waitMode = d.waitMode || 'timed'; S.stageMode = d.stageMode || 'skip'; S.filter = d.filter || '';
+  $('rate').value = S.rate; $('rateVal').textContent = S.rate.toFixed(2) + '×';
+  $('gap').value = S.gap; $('gapVal').textContent = S.gap.toFixed(1) + ' s';
+  $('waitMode').value = S.waitMode; $('stageMode').value = S.stageMode;
+  if (d.chars) S.chars = d.chars;
+  if (d.mode) setMode(d.mode);
+  S.textLang = d.textLang || 'es';
+  if (d.cueMode){ S.cueMode = d.cueMode; if ($('cueMode')) $('cueMode').value = d.cueMode; }
+  if (d.text && d.text.trim()) analyze();
+}
+
+$('voiceLang').value = S.voiceLang;
+setMode(S.mode);
+applyStudio();
+renderLibrary();
+$('apiKey').value = S.apiKey;
+$('model').value = S.model;
+setEngine(S.engine);
+applyLang();
+restore();
+window.addEventListener('beforeunload', () => {
+  try{ synth.cancel(); }catch(e){}
+  try{ if (micStream) micStream.getTracks().forEach(tr => tr.stop()); }catch(e){}
+});
+
+/* Offline: once the page has been opened online, it keeps working without
+   internet. Harmless if the service worker isn't there. */
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
